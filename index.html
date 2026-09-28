@@ -2809,20 +2809,23 @@
                 gap: 8px;
             }
             #calcOutputVal {
-                font-size: 20px;
-                flex: 0 1 auto !important;
+                font-size: clamp(1.05rem, 4.6vw, 1.3rem) !important;
+                flex: 1 1 auto !important;
                 flex-shrink: 1 !important;
                 min-width: 0 !important;
                 max-width: 100% !important;
-                white-space: nowrap !important;
+                width: 100% !important;
+                white-space: normal !important;
                 overflow: visible !important;
-                word-break: normal !important;
+                text-overflow: clip !important;
+                word-break: keep-all !important;
                 overflow-wrap: normal !important;
+                line-height: 1.35 !important;
             }
             #orderLimitHint.is-visible {
                 font-size: 11px !important;
                 max-width: 100%;
-                flex: 1 1 auto;
+                flex: 1 1 100%;
                 min-width: 0;
             }
         }
@@ -4075,12 +4078,15 @@
                 grid-template-columns: 1fr;
             }
 
-            /* Calculator — readable, no clip of payout / limit text */
+            /* Calculator — amount + fiat ALWAYS fully visible (RU/EN/DE/PL) */
             .calc-output-box {
                 width: 100% !important;
                 max-width: 100% !important;
                 box-sizing: border-box !important;
                 overflow: visible !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
             }
             .calc-label {
                 white-space: normal !important;
@@ -4089,14 +4095,33 @@
                 word-break: break-word;
                 line-height: 1.35;
             }
-            #calcOutputVal {
-                font-size: clamp(1rem, 5.2vw, 1.25rem) !important;
+            .calc-result-area {
+                width: 100% !important;
                 max-width: 100% !important;
                 min-width: 0 !important;
-                /* Prefer single line; allow shrink rather than overflow page */
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+                flex-wrap: wrap !important;
+                align-items: flex-start !important;
+            }
+            #calcOutputVal {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                flex: 1 1 auto !important;
+                flex-shrink: 1 !important;
+                font-size: clamp(1.05rem, 4.6vw, 1.3rem) !important;
+                font-weight: 700 !important;
+                line-height: 1.35 !important;
+                /* Keep "39 520.80 PLN" as one unit — wrap only at spaces if needed */
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                word-break: keep-all !important;
+                overflow-wrap: normal !important;
+                hyphens: none !important;
             }
             #orderLimitHint.is-visible,
             .calc-limit-overlay.is-visible {
@@ -4273,7 +4298,7 @@
                 font-size: clamp(1.28rem, 7vw, 1.65rem);
             }
             #calcOutputVal {
-                font-size: clamp(0.95rem, 4.8vw, 1.15rem) !important;
+                font-size: clamp(1.05rem, 4.8vw, 1.25rem) !important;
             }
             .p2p-top-bar .tab-btn {
                 font-size: 0.8rem !important;
@@ -6464,13 +6489,23 @@
             var maxW = parent ? parent.clientWidth : el.clientWidth;
             if (!maxW || maxW < 20) return;
             var isErr = el.classList.contains('is-over-limit') || el.id === 'orderLimitHint';
+            var isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            /* Mobile: keep amount+fiat readable; CSS allows wrap — do not ellipsis-clip */
+            if (isMobile && !isErr && el.id === 'calcOutputVal') {
+                el.style.whiteSpace = 'normal';
+                el.style.overflow = 'visible';
+                el.style.textOverflow = 'clip';
+                el.style.fontSize = '';
+                return;
+            }
             var base = isErr ? 15 : 24;
-            if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
-                base = isErr ? 13 : 22;
+            if (isMobile) {
+                base = isErr ? 13 : 20;
             }
             el.style.fontSize = base + 'px';
             var guard = 0;
-            while (el.scrollWidth > maxW && base > 12 && guard < 24) {
+            var floor = isMobile ? 15 : 12;
+            while (el.scrollWidth > maxW && base > floor && guard < 24) {
                 base -= 1;
                 el.style.fontSize = base + 'px';
                 guard++;
