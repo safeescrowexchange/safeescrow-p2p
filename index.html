@@ -3762,6 +3762,407 @@
             background: rgba(139, 92, 246, 0.12);
         }
 
+
+        /* ============================================================
+           REAL-MOBILE SAFETY PATCH — max-width 768 / 430 only
+           Desktop (≥769) intentionally unchanged.
+           Fixes: header padding, 100vw overflow, calc wrap, modals
+           height/safe-area, iOS input zoom, short-viewport panels.
+           ============================================================ */
+
+        @media (max-width: 768px) {
+            /* Viewport / page shell */
+            html {
+                -webkit-text-size-adjust: 100%;
+                text-size-adjust: 100%;
+            }
+            body {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: clip; /* clip avoids scrollbar from 100vw children without masking layout bugs as strongly as hidden */
+            }
+            main {
+                width: 100%;
+                max-width: 100%;
+                padding: 20px 12px 48px;
+                box-sizing: border-box;
+                overflow-x: clip;
+            }
+            .workspace-layout {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                padding: 0;
+                gap: 16px;
+            }
+            .hero-section {
+                max-width: 100%;
+                padding: 0 2px;
+                margin-bottom: 18px;
+            }
+            .hero-section h1 {
+                font-size: clamp(1.45rem, 6.2vw, 2rem);
+                line-height: 1.2;
+                word-break: break-word;
+            }
+            .hero-subtitle-block {
+                font-size: 0.95rem;
+                padding: 0 4px;
+            }
+            .hero-section p {
+                font-size: 0.84rem;
+                padding: 0 2px;
+            }
+            .preview-showcase {
+                gap: 8px;
+                margin-bottom: 22px;
+                max-width: 100%;
+            }
+            .feature-chip {
+                max-width: 100%;
+                box-sizing: border-box;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            /* Header — real phone widths; keep sticky, reduce side padding */
+            header {
+                padding: 12px 12px;
+                padding-top: max(12px, env(safe-area-inset-top, 0px));
+                padding-left: max(12px, env(safe-area-inset-left, 0px));
+                padding-right: max(12px, env(safe-area-inset-right, 0px));
+                gap: 8px;
+                box-sizing: border-box;
+                width: 100%;
+                max-width: 100%;
+            }
+            .nav-left {
+                gap: 10px;
+                min-width: 0;
+                flex: 1 1 auto;
+            }
+            .logo-title {
+                font-size: 1.05rem;
+            }
+            .logo-subtitle {
+                font-size: 0.42rem;
+                letter-spacing: 1.6px;
+            }
+            .header-right {
+                gap: 8px;
+                flex-shrink: 0;
+            }
+            .lang-selector select {
+                padding: 7px 10px;
+                font-size: 0.72rem;
+                max-width: 72px;
+            }
+
+            /* Avoid 100vw horizontal bleed (scrollbar / notch) */
+            .mobile-drawer-overlay {
+                width: 100%;
+                height: 100%;
+                height: 100dvh;
+            }
+            .modal-overlay,
+            .p2p-tip-overlay {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            /* P2P shell */
+            .p2p-container {
+                width: 100%;
+                max-width: 100%;
+                padding: 18px 14px 24px;
+                box-sizing: border-box;
+                border-radius: 16px;
+            }
+            .p2p-top-bar {
+                flex-wrap: wrap;
+                align-items: flex-end;
+                gap: 10px 12px;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            .p2p-top-bar .p2p-tabs {
+                flex: 1 1 auto;
+                min-width: 0;
+                gap: 16px;
+            }
+            .p2p-orders-nav {
+                flex: 1 1 auto;
+                width: 100%;
+                max-width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: 10px 14px;
+            }
+            .p2p-orders-nav-btn,
+            .p2p-top-bar .tab-btn {
+                font-size: 0.78rem;
+                white-space: normal;
+                word-break: break-word;
+                line-height: 1.25;
+            }
+
+            /* Filters / inputs — prevent iOS zoom + overflow */
+            .filter-group select,
+            .filter-group input,
+            .sf-icon-select-trigger,
+            #confirmTxIdInput,
+            #amountInput,
+            input[type="text"],
+            input[type="number"],
+            input[type="tel"],
+            select {
+                font-size: 16px !important; /* iOS: avoid auto-zoom on focus */
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            .p2p-filters {
+                width: 100%;
+                max-width: 100%;
+                grid-template-columns: 1fr;
+            }
+
+            /* Calculator — readable, no clip of payout / limit text */
+            .calc-output-box {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                overflow: visible !important;
+            }
+            .calc-label {
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                word-break: break-word;
+                line-height: 1.35;
+            }
+            #calcOutputVal {
+                font-size: clamp(1rem, 5.2vw, 1.25rem) !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                /* Prefer single line; allow shrink rather than overflow page */
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+            #orderLimitHint.is-visible,
+            .calc-limit-overlay.is-visible {
+                white-space: normal !important;
+                word-break: break-word !important;
+                overflow-wrap: anywhere;
+                line-height: 1.35 !important;
+                max-width: 100% !important;
+            }
+
+            /* Merchant cards — content height, no hard clip */
+            .merchant-card {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow: visible;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+            }
+            .merchant-card-name,
+            .merchant-card-rate,
+            .merchant-card-limits,
+            .merchant-card-pays {
+                max-width: 100%;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+            .merchant-card-action.trade-btn,
+            .trade-btn {
+                max-width: 100%;
+                box-sizing: border-box;
+                white-space: normal;
+            }
+
+            /* Checkout / confirmation */
+            .checkout-container,
+            #paymentConfirmSection,
+            #checkoutSection {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .transfer-details-card,
+            .escrow-details-card {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow: visible;
+            }
+            .transfer-details-grid {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            .transfer-qr-wrap {
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            .transfer-qr-wrap img {
+                max-width: 100%;
+                height: auto;
+            }
+            /* Long wallet address / network lines */
+            .transfer-details-card code,
+            .transfer-details-card .wallet-addr,
+            .order-details-value,
+            .p2p-order-id {
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                max-width: 100%;
+            }
+
+            /* History table stays in its own horizontal scroller — page must not scroll sideways */
+            .table-responsive,
+            .p2p-history-table-wrap {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-x: contain;
+            }
+            .p2p-order-card {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow: visible;
+            }
+
+            /* Short phones: don't force tall empty swipe panel */
+            .p2p-swipe-panel[data-panel="form"] {
+                min-height: 0;
+            }
+
+            /* Modals / NR / Chat / Tip — fit real viewport + safe areas */
+            .p2p-nr-overlay,
+            .p2p-chat-overlay,
+            .p2p-tip-overlay,
+            .modal-overlay,
+            #micaOverlay.mica-overlay {
+                padding: max(12px, env(safe-area-inset-top, 0px))
+                         max(12px, env(safe-area-inset-right, 0px))
+                         max(12px, env(safe-area-inset-bottom, 0px))
+                         max(12px, env(safe-area-inset-left, 0px));
+                box-sizing: border-box;
+                align-items: center;
+                justify-content: center;
+            }
+            .p2p-nr-card,
+            .p2p-chat-card,
+            .p2p-tip-card,
+            .modal-card,
+            .mica-card {
+                width: 100%;
+                max-width: min(480px, 100%);
+                max-height: min(92dvh, calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
+                overflow-x: hidden;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                box-sizing: border-box;
+            }
+            .p2p-chat-card {
+                display: flex;
+                flex-direction: column;
+                max-height: min(90dvh, calc(100dvh - 20px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
+            }
+            .p2p-chat-body {
+                min-height: 0;
+                flex: 1 1 auto;
+                overflow-y: auto;
+            }
+            .p2p-nr-actions,
+            .p2p-chat-actions {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .p2p-nr-btn,
+            .p2p-chat-actions button {
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            /* Progress bar — wrap steps on narrow screens without page overflow */
+            .p2p-pb-wrap,
+            #p2pProgressBar {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Extra-narrow phones (≈320–390) */
+        @media (max-width: 430px) {
+            header {
+                padding: 10px 10px;
+                padding-top: max(10px, env(safe-area-inset-top, 0px));
+            }
+            main {
+                padding: 14px 10px 40px;
+            }
+            .p2p-container {
+                padding: 14px 12px 20px;
+                border-radius: 14px;
+            }
+            .logo-title {
+                font-size: 0.98rem;
+            }
+            .hero-section h1 {
+                font-size: clamp(1.28rem, 7vw, 1.65rem);
+            }
+            #calcOutputVal {
+                font-size: clamp(0.95rem, 4.8vw, 1.15rem) !important;
+            }
+            .p2p-orders-nav-btn,
+            .p2p-top-bar .tab-btn {
+                font-size: 0.72rem;
+            }
+            .transfer-qr-wrap {
+                width: 112px;
+                height: 112px;
+                padding: 10px;
+            }
+            .transfer-qr-wrap img {
+                width: 92px;
+                height: 92px;
+            }
+            .p2p-nr-card,
+            .p2p-chat-card {
+                padding: 18px 14px 16px;
+                border-radius: 16px;
+            }
+        }
+
+        /* Landscape short height phones — keep modals usable */
+        @media (max-width: 900px) and (max-height: 480px) {
+            .p2p-nr-card,
+            .p2p-chat-card,
+            .p2p-tip-card,
+            .mica-card {
+                max-height: min(96dvh, calc(100dvh - 12px));
+            }
+            .p2p-nr-overlay,
+            .p2p-chat-overlay {
+                align-items: flex-start;
+                padding-top: 8px;
+            }
+        }
+
     </style>
 </head>
 <body>
