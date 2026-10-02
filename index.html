@@ -4488,7 +4488,7 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
-        .tr-overlay.open { display: flex; }
+        .tr-overlay.open { display: flex; z-index: 2147483646; }
         .tr-card {
             position: relative;
             width: 100%; max-width: 480px;
@@ -4828,7 +4828,7 @@
         }
         /* Form is docked at card bottom (outside scroll) — see .tr-form-dock */
         .tr-chat-panel > .tr-form { display: none; }
-        .tr-m { max-width: 82%; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+        .tr-m { max-width: 88%; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
         .tr-m.c { align-self: flex-end; align-items: flex-end; }
         .tr-m.s { align-self: flex-start; align-items: flex-start; }
         .tr-m.sys { align-self: center; align-items: center; max-width: 94%; }
@@ -4950,20 +4950,28 @@
         }
         .tr-form-dock {
             flex: 0 0 auto;
+            order: 1;
             margin: 0;
-            border-radius: 0;
-            border: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.09);
             background: rgba(8, 5, 16, 0.96);
-            padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
-            z-index: 3;
+            padding: 6px;
+            z-index: 10;
+            position: relative;
+            pointer-events: auto;
         }
+        .tr-actions > .tr-warn { order: 2; }
+        .tr-actions > .tr-btns { order: 3; }
         .tr-form:focus-within {
             border-color: rgba(139, 92, 246, 0.55);
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.13);
         }
-        /* iPhone: when keyboard open — hide warn/slider so input stays visible */
+        /* Mobile keyboard: keep composer visible; hide only secondary action controls. */
         .tr-card.tr-kb-open .tr-actions {
+            display: flex;
+        }
+        .tr-card.tr-kb-open .tr-actions .tr-warn,
+        .tr-card.tr-kb-open .tr-actions .tr-btns {
             display: none;
         }
         .tr-card.tr-kb-open .tr-invoice {
@@ -4985,9 +4993,15 @@
             min-height: 80px;
         }
         .tr-in {
-            flex: 1 1 auto; min-width: 0; padding: 10px 10px 10px 12px;
+            flex: 1 1 auto; min-width: 0; width: 100%;
+            min-height: 42px; max-height: 112px;
+            padding: 10px 10px 10px 12px;
             border: 0; border-radius: 10px; background: transparent;
-            color: #fff; font-size: 16px; outline: none; box-shadow: none;
+            color: #fff; font-size: 16px; line-height: 1.4;
+            outline: none; box-shadow: none;
+            resize: none; overflow-y: auto; overflow-x: hidden;
+            display: block;
+            overflow-wrap: anywhere; word-break: break-word;
         }
         .tr-in:disabled { opacity: 0.4; }
         .tr-in::placeholder { color: #77738c; }
@@ -5061,10 +5075,16 @@
                 overflow: hidden;
             }
             .tr-form-dock {
-                padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+                padding: 6px;
+            }
+            .tr-in {
+                min-height: 42px; max-height: 104px;
             }
             .tr-btn { min-width: calc(50% - 8px); }
             .tr-slide { min-height: 48px; }
+        }
+        @media (max-width: 520px) {
+            .tr-m { max-width: 92%; }
         }
         @media (max-width: 380px) {
             .tr-inv-trio { gap: 6px; }
@@ -12620,13 +12640,13 @@ function updateOrdersLocally() {
                 </div>
             </div>
             <div class="tr-actions" id="trActions">
+                <form class="tr-form tr-form-dock" id="trForm" autocomplete="off">
+                    <textarea class="tr-in" id="trInput" rows="1" maxlength="1000" placeholder="Message..." inputmode="text" enterkeyhint="send"></textarea>
+                    <button class="tr-send" type="submit" id="trSendBtn" aria-label="Send">➤</button>
+                </form>
                 <div class="tr-warn" id="trReceivedWarn" hidden></div>
                 <div class="tr-btns" id="trBtns"></div>
             </div>
-            <form class="tr-form tr-form-dock" id="trForm" autocomplete="off">
-                <input class="tr-in" id="trInput" type="text" maxlength="1000" placeholder="Message..." inputmode="text" enterkeyhint="send" />
-                <button class="tr-send" type="submit" id="trSendBtn" aria-label="Send">➤</button>
-            </form>
             <div class="tr-modal" id="trModal" aria-hidden="true">
                 <div class="tr-modal-card">
                     <h4 id="trModalTitle"></h4>
@@ -13478,13 +13498,27 @@ function updateOrdersLocally() {
                 e.preventDefault();
                 window.closeTradeRoom();
             });
+            var input = document.getElementById('trInput');
+            function fitTradeComposer() {
+                if (!input) return;
+                input.style.height = 'auto';
+                var maxH = window.matchMedia && window.matchMedia('(max-width: 520px)').matches ? 104 : 112;
+                input.style.height = Math.min(input.scrollHeight, maxH) + 'px';
+                input.style.overflowY = input.scrollHeight > maxH ? 'auto' : 'hidden';
+            }
+            if (input) {
+                input.addEventListener('input', fitTradeComposer);
+                fitTradeComposer();
+            }
             var form = document.getElementById('trForm');
             if (form) form.addEventListener('submit', function (e) {
                 e.preventDefault();
-                var input = document.getElementById('trInput');
                 var text = input ? input.value.trim() : '';
                 if (!text) return;
-                if (input) input.value = '';
+                if (input) {
+                    input.value = '';
+                    fitTradeComposer();
+                }
                 sendTrade(text.slice(0, 1000));
             });
             /* iPhone / mobile: hide warn+invoice while typing so input stays visible */
