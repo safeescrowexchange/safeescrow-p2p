@@ -3669,23 +3669,24 @@
             border: 1px solid rgba(147, 91, 234, 0.2);
             border-radius: 16px;
             box-shadow: 0 28px 56px rgba(0, 0, 0, 0.55);
-            overflow: hidden;
+            overflow: hidden; /* only body scrolls — not the whole card */
             box-sizing: border-box;
         }
         .p2p-chat-head {
-            padding: 14px 14px 10px;
+            padding: 12px 14px 8px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
             flex: 0 0 auto;
+            max-height: none;
         }
         .p2p-chat-head-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .p2p-chat-title {
-            font-size: 0.92rem;
+            font-size: 0.9rem;
             font-weight: 700;
             color: #fff;
             margin: 0;
@@ -3700,22 +3701,77 @@
             cursor: pointer;
             font-size: 1rem;
             line-height: 1;
+            flex-shrink: 0;
         }
         .p2p-chat-order {
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             color: #9ca3af;
-            line-height: 1.45;
+            line-height: 1.4;
         }
         .p2p-chat-order strong { color: #e5e7eb; font-weight: 600; }
+        /* Compact order summary (default) + expandable details */
+        .p2p-chat-order-sum {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .p2p-chat-order-sum-main {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+        .p2p-chat-order-sum-main .p2p-chat-oid {
+            color: #e5e7eb;
+            font-weight: 600;
+            font-size: 0.72rem;
+            word-break: break-all;
+        }
+        .p2p-chat-order-sum-main .p2p-chat-oline {
+            margin-top: 2px;
+            color: #9ca3af;
+            font-size: 0.68rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .p2p-chat-order-toggle {
+            flex: 0 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            color: #c4b5fd;
+            border-radius: 8px;
+            font-size: 0.62rem;
+            font-weight: 600;
+            padding: 5px 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .p2p-chat-order-details {
+            display: none;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+            font-size: 0.68rem;
+            line-height: 1.45;
+            color: #9ca3af;
+        }
+        .p2p-chat-order-details div { margin-bottom: 2px; }
+        .p2p-chat-order.is-expanded .p2p-chat-order-details { display: block; }
+        .p2p-chat-order.is-expanded .p2p-chat-order-toggle { border-color: rgba(139, 92, 246, 0.35); color: #e9d5ff; }
         .p2p-chat-body {
             flex: 1 1 auto;
-            min-height: 0;
+            min-height: 120px;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 12px 14px;
             display: flex;
             flex-direction: column;
             gap: 10px;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
         .p2p-chat-msg {
             max-width: 92%;
@@ -3738,13 +3794,17 @@
         }
         .p2p-chat-actions {
             flex: 0 0 auto;
-            padding: 10px 12px 14px;
+            padding: 8px 12px 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.06);
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-height: 42%;
+            /* Never eat half the chat — cap action list height */
+            max-height: min(32vh, 220px);
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            background: rgba(8, 5, 14, 0.92);
         }
         .p2p-chat-opt {
             text-align: left;
@@ -3755,13 +3815,25 @@
             color: #e5e7eb;
             font-size: 0.74rem;
             font-weight: 500;
-            padding: 9px 12px;
+            padding: 10px 12px;
             cursor: pointer;
             transition: border-color 0.15s, background 0.15s;
+            line-height: 1.35;
         }
         .p2p-chat-opt:hover {
             border-color: rgba(139, 92, 246, 0.4);
             background: rgba(139, 92, 246, 0.12);
+        }
+        .p2p-chat-msg {
+            max-width: 94%;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        .p2p-chat-msg.bot {
+            align-self: flex-start;
+        }
+        .p2p-chat-msg.user {
+            align-self: flex-end;
         }
 
 
@@ -4240,7 +4312,6 @@
                 justify-content: center;
             }
             .p2p-nr-card,
-            .p2p-chat-card,
             .p2p-tip-card,
             .modal-card,
             .mica-card {
@@ -4252,23 +4323,63 @@
                 -webkit-overflow-scrolling: touch;
                 box-sizing: border-box;
             }
+            /* Arbitration chat: almost full screen, body gets majority of space */
+            .p2p-chat-overlay {
+                align-items: stretch;
+                justify-content: stretch;
+                padding: 0;
+            }
             .p2p-chat-card {
                 display: flex;
                 flex-direction: column;
-                max-height: min(90dvh, calc(100dvh - 20px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
+                width: 100%;
+                max-width: none;
+                height: 100vh;
+                height: 100dvh;
+                height: -webkit-fill-available;
+                max-height: none;
+                border-radius: 0;
+                border-left: 0;
+                border-right: 0;
+                overflow: hidden; /* critical: do not scroll whole card */
             }
+            .p2p-chat-head {
+                padding: calc(10px + env(safe-area-inset-top, 0px)) 12px 8px;
+                flex: 0 0 auto;
+            }
+            .p2p-chat-title { font-size: 0.86rem; }
             .p2p-chat-body {
-                min-height: 0;
                 flex: 1 1 auto;
+                min-height: 0;
+                /* Prefer messages over header/actions — take remaining height */
                 overflow-y: auto;
+                padding: 10px 12px;
+                gap: 8px;
             }
-            .p2p-nr-actions,
+            .p2p-chat-msg {
+                font-size: 0.84rem;
+                line-height: 1.45;
+                max-width: 96%;
+            }
             .p2p-chat-actions {
+                flex: 0 0 auto;
+                max-height: min(28vh, 180px);
+                padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+                gap: 6px;
+            }
+            .p2p-chat-actions button,
+            .p2p-chat-opt {
+                max-width: 100%;
+                box-sizing: border-box;
+                font-size: 0.78rem;
+                padding: 11px 12px;
+                min-height: 44px;
+            }
+            .p2p-nr-actions {
                 flex-wrap: wrap;
                 gap: 8px;
             }
-            .p2p-nr-btn,
-            .p2p-chat-actions button {
+            .p2p-nr-btn {
                 max-width: 100%;
                 box-sizing: border-box;
             }
@@ -4334,10 +4445,14 @@
                 width: 92px;
                 height: 92px;
             }
-            .p2p-nr-card,
-            .p2p-chat-card {
+            .p2p-nr-card {
                 padding: 18px 14px 16px;
                 border-radius: 16px;
+            }
+            /* chat card is full-bleed on phone — no extra outer padding */
+            .p2p-chat-card {
+                padding: 0;
+                border-radius: 0;
             }
         }
 
@@ -4711,15 +4826,8 @@
             background: rgba(139, 92, 246, 0.30);
             border-radius: 999px;
         }
-        .tr-chat-panel > .tr-form {
-            flex: 0 0 auto;
-            margin: 0;
-            border-radius: 0;
-            border: none;
-            border-top: 1px solid rgba(255, 255, 255, 0.07);
-            background: rgba(12, 9, 22, 0.72);
-            padding: 8px 10px;
-        }
+        /* Form is docked at card bottom (outside scroll) — see .tr-form-dock */
+        .tr-chat-panel > .tr-form { display: none; }
         .tr-m { max-width: 82%; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
         .tr-m.c { align-self: flex-end; align-items: flex-end; }
         .tr-m.s { align-self: flex-start; align-items: flex-start; }
@@ -4840,9 +4948,41 @@
             border: 1px solid rgba(255, 255, 255, 0.09);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
+        .tr-form-dock {
+            flex: 0 0 auto;
+            margin: 0;
+            border-radius: 0;
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(8, 5, 16, 0.96);
+            padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+            z-index: 3;
+        }
         .tr-form:focus-within {
             border-color: rgba(139, 92, 246, 0.55);
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.13);
+        }
+        /* iPhone: when keyboard open — hide warn/slider so input stays visible */
+        .tr-card.tr-kb-open .tr-actions {
+            display: none;
+        }
+        .tr-card.tr-kb-open .tr-invoice {
+            display: none;
+        }
+        .tr-card.tr-kb-open .tr-status,
+        .tr-card.tr-kb-open .tr-peer {
+            display: none;
+        }
+        .tr-card.tr-kb-open .tr-scroll {
+            padding-top: 4px;
+            padding-bottom: 4px;
+        }
+        .tr-card.tr-kb-open .tr-chat-panel {
+            margin-top: 0;
+        }
+        .tr-card.tr-kb-open .tr-body {
+            max-height: none;
+            min-height: 80px;
         }
         .tr-in {
             flex: 1 1 auto; min-width: 0; padding: 10px 10px 10px 12px;
@@ -4891,15 +5031,40 @@
             .tr-card {
                 max-width: none; max-height: none;
                 height: 100vh; height: 100dvh;
+                height: -webkit-fill-available;
                 border-radius: 0; border-left: 0; border-right: 0;
             }
             .tr-head { padding: calc(14px + env(safe-area-inset-top, 0px)) 12px 12px 14px; }
-            .tr-scroll { padding: 12px 0; }
+            .tr-scroll { padding: 10px 0 8px; }
             .tr-invoice, .tr-status, .tr-peer, .tr-chat-panel { margin-left: 12px; margin-right: 12px; }
-            .tr-invoice { padding: 14px 14px 4px; }
-            .tr-body { min-height: 120px; max-height: 280px; max-height: min(36dvh, 280px); }
-            .tr-actions { padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
+            .tr-invoice { padding: 12px 12px 4px; }
+            /* messages fill remaining scroll; form is outside scroll at bottom */
+            .tr-chat-panel {
+                display: flex; flex-direction: column;
+                min-height: 140px;
+                flex: 1 1 auto;
+            }
+            .tr-body {
+                flex: 1 1 auto;
+                min-height: 100px;
+                max-height: none;
+            }
+            .tr-actions {
+                padding: 8px 12px 8px;
+                gap: 8px;
+            }
+            .tr-warn {
+                font-size: 0.65rem;
+                line-height: 1.35;
+                padding: 7px 10px;
+                max-height: 4.2em;
+                overflow: hidden;
+            }
+            .tr-form-dock {
+                padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+            }
             .tr-btn { min-width: calc(50% - 8px); }
+            .tr-slide { min-height: 48px; }
         }
         @media (max-width: 380px) {
             .tr-inv-trio { gap: 6px; }
@@ -5691,6 +5856,8 @@
                 tipClose: "Понятно",
                 chatBtn: "Chat / Арбитраж",
                 chatTitle: "Chat / Арбитраж",
+                chatOrderMore: "Подробнее",
+                chatOrderLess: "Скрыть",
                 chatGreeting: "Чем мы можем помочь по этой сделке?",
                 chatOpt1: "Где найти TXID?",
                 chatOpt2: "Как проверить транзакцию?",
@@ -6080,6 +6247,8 @@
                 tipClose: "Got it",
                 chatBtn: "Chat / Arbitration",
                 chatTitle: "Chat / Arbitration",
+                chatOrderMore: "Details",
+                chatOrderLess: "Hide",
                 chatGreeting: "How can we help with this order?",
                 chatOpt1: "Where do I find the TXID?",
                 chatOpt2: "How do I verify the transaction?",
@@ -6469,6 +6638,8 @@
                 tipClose: "Rozumiem",
                 chatBtn: "Chat / Arbitraż",
                 chatTitle: "Chat / Arbitraż",
+                chatOrderMore: "Szczegóły",
+                chatOrderLess: "Ukryj",
                 chatGreeting: "W czym możemy pomóc w tej transakcji?",
                 chatOpt1: "Gdzie znaleźć TXID?",
                 chatOpt2: "Jak sprawdzić transakcję?",
@@ -6858,6 +7029,8 @@
                 tipClose: "Verstanden",
                 chatBtn: "Chat / Schlichtung",
                 chatTitle: "Chat / Schlichtung",
+                chatOrderMore: "Details",
+                chatOrderLess: "Ausblenden",
                 chatGreeting: "Wobei können wir bei diesem Auftrag helfen?",
                 chatOpt1: "Wo finde ich die TXID?",
                 chatOpt2: "Wie prüfe ich die Transaktion?",
@@ -8073,13 +8246,22 @@
             const now = Date.now();
             let changed = false;
             list.forEach(function (o) {
-                if (o.expiresAt && now > o.expiresAt && isActiveOrderStatus(o.status) &&
-                    o.status !== 'PROCESSING' && o.status !== 'CONFIRMATION_SUBMITTED') {
-                    // PROCESSING / CONFIRMATION_SUBMITTED stay active until user cancels; EXPIRED only for unpaid path
-                    if (o.status === 'CREATED' || o.status === 'PAYMENT_PENDING' || o.status === 'SCREENSHOT_UPLOADED' || o.status === 'QUOTED') {
-                        o.status = 'EXPIRED';
-                        changed = true;
-                    }
+                if (!o || !o.expiresAt) return;
+                var exp = Number(o.expiresAt);
+                if (!isFinite(exp) || now <= exp) return;
+                var st = String(o.status || '').toUpperCase();
+                if (st === 'CANCELED') st = 'CANCELLED';
+                /* PROCESSING / CONFIRMATION_SUBMITTED stay active until explicit cancel/result */
+                if (st === 'PROCESSING' || st === 'CONFIRMATION_SUBMITTED' ||
+                    st === 'CANCELLED' || st === 'EXPIRED' || st === 'COMPLETED' ||
+                    st === 'DONE' || st === 'SUCCESS') {
+                    return;
+                }
+                /* CREATED / PAYMENT_PENDING / SCREENSHOT_UPLOADED / QUOTED → EXPIRED after lock window */
+                if (st === 'CREATED' || st === 'PAYMENT_PENDING' || st === 'SCREENSHOT_UPLOADED' || st === 'QUOTED') {
+                    o.status = 'EXPIRED';
+                    o.flowStage = 'closed';
+                    changed = true;
                 }
             });
             if (changed) saveOrderHistory(list);
@@ -10139,8 +10321,16 @@ function updateOrdersLocally() {
             const lang = document.getElementById('langSelect').value;
             const t = translations[lang] || translations.ru;
 
-            if (s.expiresAt && Date.now() > s.expiresAt && s.status !== 'EXPIRED') {
+            if (s.expiresAt && Date.now() > s.expiresAt && s.status !== 'EXPIRED' &&
+                s.status !== 'CANCELLED' && s.status !== 'COMPLETED' && s.status !== 'PROCESSING' &&
+                s.status !== 'CONFIRMATION_SUBMITTED') {
                 s.status = 'EXPIRED';
+                s.flowStage = 'closed';
+                if (s.orderId && typeof updateOrderHistoryStatus === 'function') {
+                    updateOrderHistoryStatus(s.orderId, { status: 'EXPIRED', flowStage: 'closed' });
+                }
+                if (typeof renderActiveOrders === 'function') renderActiveOrders();
+                if (typeof updateNavActiveOrdersCount === 'function') updateNavActiveOrdersCount();
             }
             const expired = s.status === 'EXPIRED' || isLockedOrderExpired(s);
             const left = s.expiresAt ? Math.max(0, s.expiresAt - Date.now()) : 0;
@@ -11638,6 +11828,7 @@ function updateOrdersLocally() {
 
             function p2pChatFormatOrder(o) {
                 if (!o) return '<div>—</div>';
+                var t = p2pChatT();
                 var id = o.orderId || '—';
                 var asset = o.asset || '—';
                 var fiat = o.fiat || '—';
@@ -11648,14 +11839,42 @@ function updateOrdersLocally() {
                 var rate = (o.lockedRate != null) ? String(o.lockedRate) : (o.rate != null ? String(o.rate) : '—');
                 var created = o.createdAt ? new Date(o.createdAt).toLocaleString() : (o.lockedAt ? new Date(o.lockedAt).toLocaleString() : '—');
                 var tx = p2pChatHasTxid(o) ? String(o.txId || o.txid || o.txHash) : '—';
-                var shot = p2pChatHasScreenshot(o) ? 'Yes' : 'No';
+                var shot = p2pChatHasScreenshot(o) ? (t.chatShotYes || 'Yes') : (t.chatShotNo || 'No');
                 var pair = asset + ' → ' + fiat;
-                return '<div><strong>Order #' + p2pChatEscape(id) + '</strong></div>' +
-                    '<div>' + p2pChatEscape(pair) + ' · ' + p2pChatEscape(amt) + '</div>' +
+                var moreLbl = t.chatOrderMore || 'Details';
+                var lessLbl = t.chatOrderLess || 'Hide';
+                /* Compact one-line summary + expandable details (mobile-first) */
+                return '<div class="p2p-chat-order-sum" role="button" tabindex="0" data-p2p-chat-toggle="1">' +
+                    '<div class="p2p-chat-order-sum-main">' +
+                      '<div class="p2p-chat-oid">#' + p2pChatEscape(id) + '</div>' +
+                      '<div class="p2p-chat-oline">' + p2pChatEscape(pair) + ' · ' + p2pChatEscape(amt) + ' · ' + p2pChatEscape(String(st)) + '</div>' +
+                    '</div>' +
+                    '<button type="button" class="p2p-chat-order-toggle" data-p2p-chat-toggle-btn="1" data-more="' + p2pChatEscape(moreLbl) + '" data-less="' + p2pChatEscape(lessLbl) + '">' + p2pChatEscape(moreLbl) + '</button>' +
+                  '</div>' +
+                  '<div class="p2p-chat-order-details">' +
                     '<div>Network: ' + p2pChatEscape(String(net)) + ' · ' + p2pChatEscape(String(cp)) + '</div>' +
-                    '<div>Status: ' + p2pChatEscape(String(st)) + ' · Rate: ' + p2pChatEscape(rate) + '</div>' +
-                    '<div style="opacity:0.85;margin-top:4px;">TXID: ' + p2pChatEscape(tx) + ' · Screenshot: ' + shot + '</div>' +
-                    '<div style="opacity:0.75;">Created: ' + p2pChatEscape(created) + '</div>';
+                    '<div>Rate: ' + p2pChatEscape(rate) + '</div>' +
+                    '<div>TXID: ' + p2pChatEscape(tx) + ' · Screenshot: ' + p2pChatEscape(shot) + '</div>' +
+                    '<div>Created: ' + p2pChatEscape(created) + '</div>' +
+                  '</div>';
+            }
+
+            function p2pChatBindOrderToggle() {
+                var meta = document.getElementById('p2pChatOrderMeta');
+                if (!meta || meta._p2pToggleBound) return;
+                meta._p2pToggleBound = true;
+                meta.addEventListener('click', function (e) {
+                    var tgl = e.target.closest('[data-p2p-chat-toggle], [data-p2p-chat-toggle-btn]');
+                    if (!tgl) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    meta.classList.toggle('is-expanded');
+                    var btn = meta.querySelector('[data-p2p-chat-toggle-btn]');
+                    if (btn) {
+                        var open = meta.classList.contains('is-expanded');
+                        btn.textContent = open ? (btn.getAttribute('data-less') || 'Hide') : (btn.getAttribute('data-more') || 'Details');
+                    }
+                });
             }
 
             function p2pChatResolveOrder(orderId) {
@@ -12170,7 +12389,11 @@ function updateOrdersLocally() {
                 var ov = document.getElementById('p2pChatOverlay');
                 var meta = document.getElementById('p2pChatOrderMeta');
                 var body = document.getElementById('p2pChatBody');
-                if (meta) meta.innerHTML = p2pChatFormatOrder(p2pChatOrderRef);
+                if (meta) {
+                    meta.classList.remove('is-expanded');
+                    meta.innerHTML = p2pChatFormatOrder(p2pChatOrderRef);
+                    p2pChatBindOrderToggle();
+                }
                 if (body) body.innerHTML = '';
                 var t = p2pChatT();
                 p2pChatAppend('bot', t.chatGreeting || 'How can we help with this order?');
@@ -12179,6 +12402,11 @@ function updateOrdersLocally() {
                     ov.classList.add('p2p-chat-open');
                     ov.setAttribute('aria-hidden', 'false');
                 }
+                /* After open: scroll messages into view */
+                setTimeout(function () {
+                    var b = document.getElementById('p2pChatBody');
+                    if (b) b.scrollTop = b.scrollHeight;
+                }, 50);
             };
 
             window.openP2pChatFromCurrent = function () {
@@ -12389,16 +12617,16 @@ function updateOrdersLocally() {
                 </div>
                 <div class="tr-chat-panel" id="trChatPanel">
                     <div class="tr-body" id="trBody"></div>
-                    <form class="tr-form" id="trForm" autocomplete="off">
-                        <input class="tr-in" id="trInput" type="text" maxlength="1000" placeholder="Message..." />
-                        <button class="tr-send" type="submit" id="trSendBtn" aria-label="Send">➤</button>
-                    </form>
                 </div>
             </div>
             <div class="tr-actions" id="trActions">
                 <div class="tr-warn" id="trReceivedWarn" hidden></div>
                 <div class="tr-btns" id="trBtns"></div>
             </div>
+            <form class="tr-form tr-form-dock" id="trForm" autocomplete="off">
+                <input class="tr-in" id="trInput" type="text" maxlength="1000" placeholder="Message..." inputmode="text" enterkeyhint="send" />
+                <button class="tr-send" type="submit" id="trSendBtn" aria-label="Send">➤</button>
+            </form>
             <div class="tr-modal" id="trModal" aria-hidden="true">
                 <div class="tr-modal-card">
                     <h4 id="trModalTitle"></h4>
@@ -13125,6 +13353,22 @@ function updateOrdersLocally() {
         window.continueActiveOrder = function (orderId) {
             var o = resolveOrder(orderId);
             if (!o || !o.orderId) return;
+            /* Expired lock window: force EXPIRED, never resume checkout/confirm */
+            if (o.expiresAt && Date.now() > Number(o.expiresAt)) {
+                var st0 = String(o.status || '').toUpperCase();
+                if (st0 !== 'PROCESSING' && st0 !== 'CONFIRMATION_SUBMITTED' &&
+                    st0 !== 'CANCELLED' && st0 !== 'CANCELED' && st0 !== 'COMPLETED' &&
+                    st0 !== 'EXPIRED' && st0 !== 'DONE' && st0 !== 'SUCCESS') {
+                    o.status = 'EXPIRED';
+                    o.flowStage = 'closed';
+                    if (typeof updateOrderHistoryStatus === 'function') {
+                        updateOrderHistoryStatus(o.orderId, { status: 'EXPIRED', flowStage: 'closed' });
+                    }
+                    if (typeof renderActiveOrders === 'function') renderActiveOrders();
+                    if (typeof updateNavActiveOrdersCount === 'function') updateNavActiveOrdersCount();
+                    return;
+                }
+            }
             if (typeof currentCheckoutState !== 'undefined') {
                 currentCheckoutState = o;
             } else {
@@ -13210,6 +13454,13 @@ function updateOrdersLocally() {
             } catch (eR) {}
         };
 
+        function setTradeKbOpen(on) {
+            var card = document.querySelector('#tradeRoomOverlay .tr-card');
+            if (!card) return;
+            if (on) card.classList.add('tr-kb-open');
+            else card.classList.remove('tr-kb-open');
+        }
+
         function bind() {
             var closeBtn = document.getElementById('trCloseBtn');
             if (closeBtn) closeBtn.addEventListener('click', function (e) {
@@ -13236,6 +13487,32 @@ function updateOrdersLocally() {
                 if (input) input.value = '';
                 sendTrade(text.slice(0, 1000));
             });
+            /* iPhone / mobile: hide warn+invoice while typing so input stays visible */
+            var input = document.getElementById('trInput');
+            if (input) {
+                input.addEventListener('focus', function () {
+                    setTradeKbOpen(true);
+                    setTimeout(function () {
+                        var body = document.getElementById('trBody');
+                        if (body) body.scrollTop = body.scrollHeight;
+                    }, 300);
+                });
+                input.addEventListener('blur', function () {
+                    setTimeout(function () { setTradeKbOpen(false); }, 150);
+                });
+            }
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', function () {
+                    var overlay = document.getElementById('tradeRoomOverlay');
+                    if (!overlay || !overlay.classList.contains('open')) return;
+                    var vv = window.visualViewport;
+                    /* keyboard likely open when visual height much smaller than layout */
+                    var kbLikely = vv && vv.height < window.innerHeight * 0.75;
+                    var active = document.activeElement;
+                    var typing = active && active.id === 'trInput';
+                    setTradeKbOpen(!!(kbLikely && typing));
+                });
+            }
         }
 
         if (document.readyState === 'loading') {
