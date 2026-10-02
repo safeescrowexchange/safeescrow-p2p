@@ -4356,6 +4356,672 @@
             }
         }
 
+
+        /* ===== Trade Room — premium fintech UI (namespace .tr-*, presentation only) ===== */
+        /* The global "* { font-family }" rule sets a family on every element, so the Trade Room
+           font stack has to target descendants explicitly (scoped to the overlay only). */
+        .tr-overlay,
+        .tr-overlay * {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .tr-overlay [hidden] { display: none !important; }
+        .tr-overlay {
+            position: fixed; inset: 0; z-index: 2147482500;
+            display: none; align-items: center; justify-content: center;
+            padding: 20px;
+            background: rgba(4, 2, 10, 0.74);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .tr-overlay.open { display: flex; }
+        .tr-card {
+            position: relative;
+            width: 100%; max-width: 480px;
+            max-height: calc(100vh - 40px);
+            max-height: calc(100dvh - 40px);
+            display: flex; flex-direction: column; overflow: hidden;
+            border-radius: 22px;
+            background: linear-gradient(165deg, rgba(27, 20, 46, 0.90) 0%, rgba(12, 8, 22, 0.96) 100%);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow:
+                0 30px 90px rgba(0, 0, 0, 0.60),
+                0 0 0 1px rgba(139, 92, 246, 0.07),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07);
+            color: #fff;
+            line-height: 1.4;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* ---- Header ---- */
+        .tr-head {
+            flex: 0 0 auto;
+            padding: 16px 16px 14px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0) 100%);
+        }
+        .tr-head-top {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .tr-brand { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 auto; }
+        .tr-brand-ico {
+            flex: 0 0 auto; width: 40px; height: 40px; border-radius: 13px;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: #ddd6fe;
+            background: linear-gradient(145deg, rgba(139, 92, 246, 0.30), rgba(76, 63, 154, 0.22));
+            border: 1px solid rgba(167, 139, 250, 0.28);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        .tr-brand-ico svg { width: 20px; height: 20px; display: block; }
+        .tr-brand-txt { min-width: 0; flex: 1 1 auto; }
+        .tr-eyebrow {
+            font-size: 0.6rem; font-weight: 600; letter-spacing: 0.9px; text-transform: uppercase;
+            color: #8b86a3; margin-bottom: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .tr-brand-title {
+            margin: 0; font-size: 1.12rem; font-weight: 700; letter-spacing: -0.3px; color: #fff; line-height: 1.2;
+        }
+        .tr-order-line {
+            display: flex; align-items: baseline; gap: 6px; min-width: 0; margin-top: 3px;
+            font-size: 0.74rem; color: #8b86a3;
+        }
+        .tr-order-lbl { flex: 0 0 auto; font-weight: 500; white-space: nowrap; }
+        .tr-overlay .tr-order-id {
+            flex: 0 1 auto; min-width: 0; max-width: 100%;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.74rem; font-weight: 600; letter-spacing: 0.2px; color: #c4b5fd;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .tr-order-id::before { content: "#"; opacity: 0.7; }
+        .tr-order-id:empty { display: none; }
+        .tr-sub { display: none; }
+        .tr-x {
+            flex: 0 0 auto;
+            width: 36px; height: 36px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #a1a1b5; font-size: 19px; cursor: pointer;
+            border-radius: 11px; line-height: 1;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        .tr-x:hover {
+            background: rgba(139, 92, 246, 0.16);
+            border-color: rgba(139, 92, 246, 0.32);
+            color: #fff;
+        }
+
+        /* ---- Scrollable middle: details / status / counterparty / chat ---- */
+        .tr-scroll {
+            flex: 1 1 auto; min-height: 0;
+            overflow-y: auto; overflow-x: hidden;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            padding: 14px 0 14px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(139, 92, 246, 0.35) transparent;
+        }
+
+        /* ---- Order details (invoice card) ---- */
+        .tr-invoice {
+            margin: 0 14px;
+            padding: 16px 16px 6px;
+            border-radius: 16px;
+            background:
+                radial-gradient(120% 90% at 0% 0%, rgba(139, 92, 246, 0.14) 0%, rgba(139, 92, 246, 0) 60%),
+                rgba(10, 7, 19, 0.62);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.25);
+            min-width: 0;
+        }
+        .tr-inv-hero {
+            padding-bottom: 14px; margin-bottom: 4px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.10);
+            min-width: 0;
+        }
+        .tr-inv-hero-label {
+            font-size: 0.62rem; font-weight: 600; letter-spacing: 0.9px;
+            text-transform: uppercase; color: #8b86a3; margin-bottom: 6px;
+        }
+        .tr-inv-hero-val {
+            display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px;
+            color: #fff; line-height: 1.1; min-width: 0;
+            font-variant-numeric: tabular-nums;
+        }
+        .tr-amt {
+            font-size: clamp(1.55rem, 7.2vw, 2.15rem); font-weight: 700; letter-spacing: -0.8px;
+            white-space: nowrap; max-width: 100%;
+        }
+        .tr-cur {
+            font-size: clamp(0.95rem, 4.2vw, 1.15rem); font-weight: 600; letter-spacing: 0.2px;
+            color: #c4b5fd; white-space: nowrap;
+        }
+        .tr-inv-hero-sub {
+            margin-top: 8px; font-size: 0.74rem; color: #8b86a3; line-height: 1.35;
+            font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+        }
+        .tr-inv-hero-sub b { font-weight: 600; color: #b4b0c8; }
+        .tr-inv-trio {
+            display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
+            padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .tr-inv-cell { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .tr-inv-details {
+            display: flex; flex-direction: column; gap: 0;
+            width: 100%; min-width: 0;
+            padding: 4px 0 2px;
+        }
+        .tr-inv-row {
+            display: grid;
+            grid-template-columns: minmax(96px, 38%) minmax(0, 1fr);
+            align-items: center;
+            column-gap: 14px;
+            padding: 10px 0; min-width: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .tr-inv-row:last-child { border-bottom: 0; }
+        .tr-inv-k {
+            font-size: 0.64rem; font-weight: 600; letter-spacing: 0.7px;
+            text-transform: uppercase; color: #8b86a3;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+            text-align: left;
+            justify-self: start;
+        }
+        .tr-inv-row .tr-inv-k { flex: none; max-width: none; width: 100%; }
+        .tr-inv-v {
+            font-size: 0.84rem; font-weight: 600; color: #f1effa; min-width: 0;
+            overflow-wrap: break-word; word-break: normal; font-variant-numeric: tabular-nums;
+        }
+        .tr-inv-row .tr-inv-v {
+            text-align: right;
+            justify-self: end;
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            overflow-wrap: break-word;
+            word-break: normal;
+            hyphens: none;
+        }
+        .tr-inv-cell .tr-inv-v { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Payment method */
+        .tr-pay-pill {
+            display: inline-flex; align-items: center; gap: 8px; max-width: 100%;
+            padding: 4px 11px 4px 5px; border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            font-size: 0.78rem; font-weight: 600; color: #f1effa;
+        }
+        .tr-pay-pill > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tr-pay-logos { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; }
+        .tr-pay-img {
+            display: block; visibility: visible; opacity: 1;
+            flex: 0 0 auto;
+            width: auto; height: 22px; max-width: 52px; min-width: 28px;
+            object-fit: contain;
+            padding: 2px 4px; border-radius: 6px;
+            background: #fff;
+        }
+        .tr-pay-ico {
+            flex: 0 0 auto;
+            min-width: 30px; height: 22px; padding: 0 5px; border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 9px; font-weight: 800; letter-spacing: 0.2px;
+            background: #1a1f71; color: #fff;
+        }
+        .tr-pay-ico.mc { background: linear-gradient(90deg, #eb001b 50%, #f79e1b 50%); font-size: 0; min-width: 30px; }
+        .tr-pay-ico.sepa { background: #0a2540; font-size: 8px; }
+        .tr-pay-ico.rev { background: #0075eb; font-size: 8px; }
+        .tr-pay-fallback {
+            font-size: 0.68rem; font-weight: 700; color: #e5e7eb;
+            letter-spacing: 0.02em; padding: 0 2px;
+        }
+
+        /* ---- System status ---- */
+        .tr-status {
+            display: flex; align-items: center; gap: 12px;
+            margin: 12px 14px 0; padding: 12px 14px;
+            border-radius: 14px; min-width: 0;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.10), rgba(245, 158, 11, 0.04));
+            border: 1px solid rgba(245, 158, 11, 0.22);
+        }
+        .tr-status.ok {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.11), rgba(16, 185, 129, 0.04));
+            border-color: rgba(16, 185, 129, 0.24);
+        }
+        .tr-status.bad {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.10), rgba(239, 68, 68, 0.04));
+            border-color: rgba(239, 68, 68, 0.24);
+        }
+        .tr-status-dot {
+            position: relative; flex: 0 0 auto;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.45);
+        }
+        .tr-status-dot::after {
+            content: ""; position: absolute; inset: -5px; border-radius: 50%;
+            border: 1px solid rgba(245, 158, 11, 0.35); opacity: 0;
+            pointer-events: none;
+        }
+        .tr-status.proc .tr-status-dot {
+            animation: tr-breathe 2.6s ease-in-out infinite;
+        }
+        .tr-status.proc .tr-status-dot::after {
+            animation: tr-ring 2.6s ease-out infinite;
+        }
+        .tr-status.ok .tr-status-dot {
+            background: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.55);
+            animation: none;
+        }
+        .tr-status.ok .tr-status-dot::after { display: none; animation: none; }
+        .tr-status.bad .tr-status-dot {
+            background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.55);
+            animation: none;
+        }
+        .tr-status.bad .tr-status-dot::after { display: none; animation: none; }
+        @keyframes tr-breathe {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.82;
+                box-shadow: 0 0 6px rgba(245, 158, 11, 0.35);
+            }
+            50% {
+                transform: scale(1.28);
+                opacity: 1;
+                box-shadow: 0 0 14px rgba(245, 158, 11, 0.55);
+            }
+        }
+        @keyframes tr-ring {
+            0% { transform: scale(0.7); opacity: 0.55; }
+            70% { transform: scale(1.55); opacity: 0; }
+            100% { transform: scale(1.55); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .tr-status.proc .tr-status-dot { animation: none; }
+            .tr-status.proc .tr-status-dot::after { animation: none; }
+        }
+        .tr-status-text {
+            flex: 1 1 auto; min-width: 0;
+            font-size: 0.84rem; font-weight: 600; color: #f1effa; line-height: 1.3;
+            overflow-wrap: anywhere;
+        }
+        .tr-status-text span {
+            display: none; /* secondary meta removed — details live in invoice */
+        }
+
+        /* ---- Counterparty ---- */
+        .tr-peer {
+            display: flex; align-items: center; gap: 12px;
+            margin: 12px 14px 0; padding: 4px 2px; min-width: 0;
+        }
+        .tr-peer-av {
+            position: relative; flex: 0 0 auto;
+            width: 38px; height: 38px; border-radius: 13px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700; letter-spacing: 0.3px; color: #ede9fe;
+            background: linear-gradient(145deg, #4c3f9a, #2b2563);
+            border: 1px solid rgba(167, 139, 250, 0.30);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+        }
+        .tr-peer-dot {
+            position: absolute; right: -3px; bottom: -3px;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: #22c55e; border: 2px solid #150f25;
+        }
+        .tr-peer-info { min-width: 0; flex: 1 1 auto; }
+        .tr-peer-name {
+            font-size: 0.9rem; font-weight: 600; color: #fff;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .tr-peer-state { font-size: 0.7rem; font-weight: 500; color: #4ade80; margin-top: 1px; }
+
+        /* ---- Chat panel (messages + composer) ---- */
+        .tr-chat-panel {
+            margin: 8px 14px 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            border-radius: 16px;
+            background: rgba(8, 5, 16, 0.50);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+        .tr-body {
+            margin: 0;
+            min-height: 140px;
+            max-height: 300px;
+            overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            padding: 14px 12px;
+            border-radius: 0;
+            background: transparent;
+            border: none;
+            display: flex; flex-direction: column; gap: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(139, 92, 246, 0.30) transparent;
+            flex: 1 1 auto;
+        }
+        .tr-body::-webkit-scrollbar { width: 5px; }
+        .tr-body::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.30);
+            border-radius: 999px;
+        }
+        .tr-chat-panel > .tr-form {
+            flex: 0 0 auto;
+            margin: 0;
+            border-radius: 0;
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(12, 9, 22, 0.72);
+            padding: 8px 10px;
+        }
+        .tr-m { max-width: 82%; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+        .tr-m.c { align-self: flex-end; align-items: flex-end; }
+        .tr-m.s { align-self: flex-start; align-items: flex-start; }
+        .tr-m.sys { align-self: center; align-items: center; max-width: 94%; }
+        .tr-who {
+            font-size: 0.6rem; font-weight: 600; letter-spacing: 0.4px;
+            text-transform: uppercase; color: #8b86a3; padding: 0 4px;
+        }
+        .tr-b {
+            max-width: 100%;
+            padding: 10px 13px; border-radius: 16px;
+            font-size: 0.86rem; line-height: 1.5;
+            white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;
+        }
+        .tr-m.c .tr-b {
+            background: linear-gradient(145deg, #4b3fa8 0%, #392f88 100%);
+            border: 1px solid rgba(167, 139, 250, 0.20);
+            border-bottom-right-radius: 5px;
+            color: #f5f3ff;
+            box-shadow: 0 4px 14px rgba(36, 26, 92, 0.35);
+        }
+        .tr-m.s .tr-b {
+            background: #262430;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-bottom-left-radius: 5px;
+            color: #ebe9f3;
+        }
+        .tr-m.sys .tr-b {
+            background: rgba(245, 158, 11, 0.07);
+            border: 1px solid rgba(245, 158, 11, 0.18);
+            color: #fbbf24; font-size: 0.76rem; text-align: center; border-radius: 12px;
+        }
+        .tr-ts { font-size: 0.62rem; color: #77738c; padding: 0 4px; font-variant-numeric: tabular-nums; }
+
+        /* ---- Footer: warning / actions / message input ---- */
+        .tr-actions {
+            flex: 0 0 auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 12px 14px 14px;
+            display: flex; flex-direction: column; gap: 10px;
+            background: rgba(7, 4, 14, 0.55);
+        }
+        .tr-warn {
+            display: flex; align-items: flex-start; gap: 9px;
+            font-size: 0.72rem; color: #d8d5e6; line-height: 1.45;
+            background: rgba(245, 158, 11, 0.07);
+            border: 1px solid rgba(245, 158, 11, 0.18);
+            border-radius: 12px; padding: 10px 12px; min-width: 0;
+            overflow-wrap: anywhere;
+        }
+        .tr-warn::before {
+            content: "⚠"; flex: 0 0 auto; font-size: 0.9rem; line-height: 1.25; color: #fbbf24;
+        }
+        .tr-btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .tr-btns:empty { display: none; }
+
+        /* Slide to confirm */
+        .tr-slide {
+            position: relative; width: 100%; height: 52px;
+            box-sizing: border-box;
+            border-radius: 999px; overflow: hidden;
+            background: rgba(16, 185, 129, 0.10);
+            border: 1px solid rgba(16, 185, 129, 0.28);
+            user-select: none; -webkit-user-select: none; touch-action: none;
+            cursor: grab;
+        }
+        .tr-slide:active { cursor: grabbing; }
+        .tr-slide-fill {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 0;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.30), rgba(5, 150, 105, 0.55));
+            border-radius: 999px; pointer-events: none; transition: none;
+        }
+        .tr-slide-label {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 600; color: #a7f3d0; letter-spacing: 0.2px;
+            pointer-events: none; padding: 0 14px 0 58px; text-align: center;
+        }
+        .tr-slide-handle {
+            position: absolute; left: 1px; top: 1px;
+            width: 48px; height: 48px; border-radius: 50%;
+            box-sizing: border-box;
+            background: linear-gradient(145deg, #34d399, #059669);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.40), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 20px; line-height: 1; z-index: 2;
+            transition: box-shadow 0.15s ease;
+        }
+        .tr-slide.done { border-color: rgba(16, 185, 129, 0.5); pointer-events: none; opacity: 0.7; }
+
+        .tr-btn {
+            flex: 1 1 auto; min-width: 100px; padding: 11px 14px; border-radius: 12px;
+            font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            background: rgba(255, 255, 255, 0.02); color: #a9a5be;
+            transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+        }
+        .tr-btn:hover:not(:disabled) {
+            border-color: rgba(255, 255, 255, 0.18); color: #ebe9f3; background: rgba(255, 255, 255, 0.04);
+        }
+        .tr-btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: rgba(16, 185, 129, 0.4); color: #fff;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.22);
+        }
+        .tr-btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, #12c58d, #06a273); color: #fff; }
+        .tr-btn-danger { background: transparent; border-color: rgba(239, 68, 68, 0.28); color: #fca5a5; }
+        .tr-btn-danger:hover:not(:disabled) {
+            background: rgba(239, 68, 68, 0.09); border-color: rgba(239, 68, 68, 0.45); color: #fecaca;
+        }
+        .tr-btn:disabled { opacity: 0.4; cursor: default; }
+
+        /* Message input */
+        .tr-form {
+            display: flex; gap: 8px; align-items: stretch;
+            padding: 6px; border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .tr-form:focus-within {
+            border-color: rgba(139, 92, 246, 0.55);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.13);
+        }
+        .tr-in {
+            flex: 1 1 auto; min-width: 0; padding: 10px 10px 10px 12px;
+            border: 0; border-radius: 10px; background: transparent;
+            color: #fff; font-size: 16px; outline: none; box-shadow: none;
+        }
+        .tr-in:disabled { opacity: 0.4; }
+        .tr-in::placeholder { color: #77738c; }
+        .tr-send {
+            flex: 0 0 auto; width: 46px; border: 0; border-radius: 12px;
+            background: linear-gradient(145deg, #7c5ce6, #5b3fc4);
+            color: #fff; font-size: 17px; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(76, 50, 170, 0.35);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .tr-send:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(76, 50, 170, 0.45); }
+        .tr-send:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+
+        /* Confirmation modal (existing flow, restyled only) */
+        .tr-modal {
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.58);
+            display: none; align-items: center; justify-content: center; padding: 16px; z-index: 5;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .tr-modal.open { display: flex; }
+        .tr-modal-card {
+            background: rgba(18, 13, 31, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 18px; padding: 22px 18px; max-width: 340px; width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        .tr-modal-card h4 { margin: 0 0 8px; font-size: 0.98rem; font-weight: 700; color: #fff; }
+        .tr-modal-card p { margin: 0 0 16px; font-size: 0.82rem; color: #d1cfe0; line-height: 1.5; overflow-wrap: anywhere; }
+        .tr-card-btn {
+            margin-top: 8px; width: 100%; padding: 9px 12px; border-radius: 11px;
+            font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.22), rgba(109, 40, 217, 0.28));
+            color: #e9d5ff; transition: border-color 0.2s ease, transform 0.15s ease;
+        }
+        .tr-card-btn:hover { border-color: rgba(139, 92, 246, 0.55); transform: translateY(-1px); }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 520px) {
+            .tr-overlay { padding: 0; align-items: stretch; }
+            .tr-card {
+                max-width: none; max-height: none;
+                height: 100vh; height: 100dvh;
+                border-radius: 0; border-left: 0; border-right: 0;
+            }
+            .tr-head { padding: calc(14px + env(safe-area-inset-top, 0px)) 12px 12px 14px; }
+            .tr-scroll { padding: 12px 0; }
+            .tr-invoice, .tr-status, .tr-peer, .tr-chat-panel { margin-left: 12px; margin-right: 12px; }
+            .tr-invoice { padding: 14px 14px 4px; }
+            .tr-body { min-height: 120px; max-height: 280px; max-height: min(36dvh, 280px); }
+            .tr-actions { padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
+            .tr-btn { min-width: calc(50% - 8px); }
+        }
+        @media (max-width: 380px) {
+            .tr-inv-trio { gap: 6px; }
+            .tr-inv-k { letter-spacing: 0.4px; font-size: 0.6rem; }
+            .tr-brand-ico { width: 36px; height: 36px; }
+            .tr-b { font-size: 0.84rem; }
+        }
+        @media (max-height: 560px) and (min-width: 521px) {
+            .tr-body { min-height: 100px; max-height: 180px; }
+        }
+
+
+
+        /* ============================================================
+           PATCH 5.30 — TRADE / ORDERS VISUAL POLISH (isolated)
+           Payment method HTML, card/IBAN/SWIFT/BLIK fields and validators untouched.
+           ============================================================ */
+        .p2p-top-bar { align-items: center; gap: 14px 22px; }
+        .p2p-top-bar .p2p-tabs { align-items: center; }
+        .p2p-top-bar .tab-btn { line-height: 1.15; }
+        .p2p-orders-nav {
+            margin-left: auto;
+            align-items: center;
+            gap: 6px;
+            padding: 3px;
+            border: 1px solid rgba(255,255,255,.055);
+            border-radius: 12px;
+            background: rgba(9,6,16,.46);
+        }
+        .p2p-orders-nav-btn {
+            min-height: 34px;
+            padding: 7px 11px;
+            border-radius: 9px;
+            line-height: 1.1;
+            font-size: .76rem;
+        }
+        .p2p-orders-nav-btn:hover { background: rgba(255,255,255,.035); }
+        .p2p-orders-nav-btn.is-active {
+            background: linear-gradient(180deg, rgba(96,66,156,.34), rgba(55,37,95,.38));
+            border: 1px solid rgba(139,92,246,.34);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 4px 14px rgba(76,29,149,.14);
+        }
+        .p2p-orders-nav-btn.is-active::after { display:none !important; }
+        #navActiveOrdersCount { min-width:1.9em; padding:2px 6px; font-size:.64rem; }
+        .p2p-orders-page { width:100%; animation: sfOrdersIn .18s ease-out; }
+        @keyframes sfOrdersIn { from{opacity:.72;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
+        .p2p-orders-page-header { margin-bottom:0 !important; padding:2px 0 13px !important; border-bottom-color:rgba(255,255,255,.065) !important; }
+        .p2p-orders-page-title { color:#a89bc9; font-size:.72rem; font-weight:600; letter-spacing:.035em; }
+        #activeOrdersList.p2p-order-cards, #orderHistoryCards.p2p-order-cards { gap:8px; }
+        #activeOrdersList .p2p-order-card, #orderHistoryCards .p2p-order-card {
+            padding:14px 15px;
+            border:1px solid rgba(255,255,255,.065);
+            border-radius:14px;
+            background:radial-gradient(120% 130% at 0% 0%, rgba(139,92,246,.065), rgba(139,92,246,0) 55%), rgba(9,6,16,.32);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.025), 0 7px 20px rgba(0,0,0,.13);
+            transition:border-color .18s ease, background .18s ease, transform .18s ease;
+        }
+        #activeOrdersList .p2p-order-card:hover, #orderHistoryCards .p2p-order-card:hover {
+            border-color:rgba(139,92,246,.20);
+            background:radial-gradient(120% 130% at 0% 0%, rgba(139,92,246,.09), rgba(139,92,246,0) 55%), rgba(12,8,21,.43);
+            transform:translateY(-1px);
+        }
+        .p2p-order-type { letter-spacing:.01em; }
+        .p2p-order-status { padding:3px 8px; border-radius:999px; background:rgba(16,185,129,.06); border:1px solid rgba(16,185,129,.14); }
+        .p2p-order-status.is-bad { background:rgba(239,68,68,.055); border-color:rgba(239,68,68,.14); }
+        .p2p-order-id { font-weight:600; letter-spacing:.01em; }
+        .p2p-order-fin { font-size:.9rem; font-weight:650; }
+        #activeOrdersList .p2p-order-cancel.checkout-back, #activeOrdersList .tr-card-btn, #activeOrdersList .p2p-chat-btn,
+        #orderHistoryCards .tr-card-btn, #orderHistoryCards .p2p-chat-btn {
+            width:auto; align-self:flex-end; min-height:34px; padding:7px 11px !important; margin-top:2px; border-radius:9px; font-size:.71rem !important;
+        }
+        #activeOrdersList .p2p-order-cancel.checkout-back { color:#fca5a5; border:1px solid rgba(239,68,68,.16); background:rgba(239,68,68,.025); }
+        #activeOrdersList .tr-card-btn, #orderHistoryCards .tr-card-btn { border-color:rgba(139,92,246,.26); background:rgba(139,92,246,.075); }
+        .p2p-history-table-wrap { border:1px solid rgba(255,255,255,.055); border-radius:14px; overflow:auto; background:rgba(8,5,14,.26); }
+        .p2p-history-table-wrap .orders-table th { background:rgba(255,255,255,.018); }
+        .p2p-history-table-wrap .orders-table td { padding-top:13px; padding-bottom:13px; }
+
+        .tr-card { max-width:520px; border-radius:20px; background:linear-gradient(160deg, rgba(26,19,44,.95) 0%, rgba(11,7,19,.98) 100%); box-shadow:0 26px 80px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.055); }
+        .tr-head { padding:16px 18px 14px; }
+        .tr-brand-ico { width:38px; height:38px; border-radius:12px; }
+        .tr-brand-title { font-size:1.08rem; }
+        .tr-invoice { margin-left:16px; margin-right:16px; padding:17px 17px 6px; border-radius:17px; background:radial-gradient(140% 100% at 0% 0%, rgba(139,92,246,.12), rgba(139,92,246,0) 58%), rgba(8,5,15,.56); }
+        .tr-inv-hero-label { font-size:.59rem; letter-spacing:1px; }
+        .tr-amt { font-size:clamp(1.62rem,6.6vw,2.18rem); letter-spacing:-.55px; }
+        .tr-cur { font-size:1rem; }
+        .tr-inv-hero-secondary { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:9px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,.028); border:1px solid rgba(255,255,255,.045); color:#8f8aa6; font-size:.71rem; line-height:1.25; }
+        .tr-inv-hero-secondary b { color:#c9c3d9; font-weight:600; white-space:nowrap; font-variant-numeric:tabular-nums; }
+        .tr-inv-hero-sub { margin-top:10px; font-size:.71rem; }
+        .tr-inv-row { padding:9px 0; }
+        .tr-inv-k { font-size:.61rem; }
+        .tr-inv-v { font-size:.81rem; }
+        .tr-pay-pill { padding:4px 9px 4px 5px; gap:7px; }
+        .tr-pay-img { height:21px; max-width:50px; }
+        .tr-status { margin-left:16px; margin-right:16px; padding:11px 13px; border-radius:13px; }
+        .tr-peer { margin-left:16px; margin-right:16px; }
+        .tr-chat-panel { margin-left:16px; margin-right:16px; border-radius:15px; }
+        .tr-body { min-height:150px; max-height:310px; padding:13px 12px; gap:10px; }
+        .tr-b { font-size:.82rem; line-height:1.45; }
+        .tr-actions { padding:11px 16px 14px; gap:9px; }
+        .tr-warn { font-size:.7rem; border-radius:11px; padding:9px 11px; }
+        .tr-slide { height:54px; border-color:rgba(16,185,129,.25); box-shadow:inset 0 1px 0 rgba(255,255,255,.035); }
+        .tr-slide-handle { top:1px; width:50px; height:50px; cursor:grab; touch-action:none; }
+        .tr-slide.is-dragging .tr-slide-handle { cursor:grabbing; box-shadow:0 5px 18px rgba(16,185,129,.46), inset 0 1px 0 rgba(255,255,255,.28); }
+        .tr-slide-label { padding-left:64px; font-size:.78rem; }
+        .tr-btn { min-height:42px; border-radius:10px; }
+        .tr-modal-card { padding:20px 18px; }
+        @media (max-width:768px) {
+            .p2p-top-bar { align-items:stretch; gap:12px; }
+            .p2p-top-bar .p2p-tabs, .p2p-top-bar .p2p-orders-nav { width:100%; }
+            .p2p-top-bar .p2p-tabs { justify-content:center; }
+            .p2p-orders-nav { margin-left:0; padding:3px; }
+            .p2p-orders-nav-btn { min-height:40px; flex:1 1 0; justify-content:center; }
+            #activeOrdersList .p2p-order-card, #orderHistoryCards .p2p-order-card { padding:13px 12px; border-radius:13px; }
+            .tr-card { max-width:none; }
+        }
+        @media (max-width:520px) {
+            .tr-invoice, .tr-status, .tr-peer, .tr-chat-panel { margin-left:12px; margin-right:12px; }
+            .tr-invoice { padding:15px 14px 5px; }
+            .tr-actions { padding-left:12px; padding-right:12px; }
+            .tr-inv-hero-secondary { flex-direction:column; align-items:flex-start; gap:3px; }
+        }
+
     </style>
 </head>
 <body>
@@ -5049,6 +5715,42 @@
                 chatCatSent: "Ордер отменён, а я уже отправил деньги",
                 chatOptClose: "Закрыть чат",
                 chatArbBtn: "Arbitration",
+
+                tradeRoomTitle: "P2P ТОРГОВЫЙ ОРДЕР",
+                tradeDirection: "Направление",
+                tradeAmount: "Сумма",
+                tradeYouGet: "Вы получаете / платите",
+                tradeYouReceive: "Вы получаете",
+                tradeYouGive: "Вы отдаёте",
+                tradeYouPay: "Вы платите",
+                tradeProcessing: "Обработка",
+                tradePayCardGeneric: "Visa / Mastercard",
+                tradeReceivedBtn: "Я получил деньги",
+                tradeReceivedWarn: "Сдвигайте ползунок только после фактического поступления оплаты на указанный банковский счёт.",
+                tradeReceivedTitle: "Подтвердить получение?",
+                tradeReceivedText: "Проверьте банковский счёт. После подтверждения это действие нельзя отменить.",
+                tradeCancelTitle: "Отменить этот ордер?",
+                tradeCancelText: "Вы уверены, что хотите отменить этот ордер? Это действие нельзя отменить.",
+                tradeContinueBtn: "Продолжить / Trade Chat",
+                continueBtn: "Продолжить",
+                tradeViewBtn: "Открыть Trade Chat",
+                cancelOrderBtn: "Отменить ордер",
+                tradeMsgPlaceholder: "Сообщение…",
+                tradeSlideConfirm: "Сдвиньте для подтверждения",
+                tradeAsset: "Актив",
+                histNetwork: "Сеть",
+                tradeCounterparty: "Контрагент",
+                tradeOnline: "В сети",
+                tradeYouLabel: "Вы",
+                tradeSystemLabel: "СИСТЕМА",
+                tradePeerDefault: "Swift Bridge Hub",
+                tradeNetworkError: "Сетевая ошибка",
+                tradeActionFailed: "Действие не выполнено",
+                tradeOpenFail: "Не удалось подключиться к торговому серверу. Вы всё ещё можете просмотреть детали ордера.",
+                tradeMsgBlocked: "Сообщение заблокировано из соображений безопасности.",
+                tradeOrderClosed: "Ордер закрыт.",
+                tradeMsgNotDelivered: "Сообщение не доставлено. Попробуйте ещё раз.",
+                tradeServerUnreachable: "Торговый сервер недоступен.",
                 chatGreeting: "Чем можем помочь по этой сделке?",
                 chatOpenDisputeBtn: "Открыть арбитраж по этой сделке",
                 chatSnapTitle: "Контекст сделки",
@@ -5402,6 +6104,42 @@
                 chatCatSent: "Order cancelled but I already sent funds",
                 chatOptClose: "Close chat",
                 chatArbBtn: "Arbitration",
+
+                tradeRoomTitle: "P2P TRADE ORDER",
+                tradeDirection: "Direction",
+                tradeAmount: "Amount",
+                tradeYouGet: "You receive / pay",
+                tradeYouReceive: "You receive",
+                tradeYouGive: "You give",
+                tradeYouPay: "You pay",
+                tradeProcessing: "Processing",
+                tradePayCardGeneric: "Visa / Mastercard",
+                tradeReceivedBtn: "I received the money",
+                tradeReceivedWarn: "Slide the slider only after the payment has actually arrived in the bank account specified earlier.",
+                tradeReceivedTitle: "Confirm receipt?",
+                tradeReceivedText: "Check your bank account. Once confirmed, this action cannot be undone.",
+                tradeCancelTitle: "Cancel this order?",
+                tradeCancelText: "Are you sure you want to cancel this order? This cannot be undone.",
+                tradeContinueBtn: "Continue / Trade Chat",
+                continueBtn: "Continue",
+                tradeViewBtn: "View Trade Chat",
+                cancelOrderBtn: "Cancel Order",
+                tradeMsgPlaceholder: "Message…",
+                tradeSlideConfirm: "Slide to confirm",
+                tradeAsset: "Asset",
+                histNetwork: "Network",
+                tradeCounterparty: "Counterparty",
+                tradeOnline: "Online",
+                tradeYouLabel: "You",
+                tradeSystemLabel: "SYSTEM",
+                tradePeerDefault: "Swift Bridge Hub",
+                tradeNetworkError: "Network error",
+                tradeActionFailed: "Action failed",
+                tradeOpenFail: "Could not reach trade server. You can still view order details.",
+                tradeMsgBlocked: "Message blocked for safety.",
+                tradeOrderClosed: "Order is closed.",
+                tradeMsgNotDelivered: "Message not delivered. Try again.",
+                tradeServerUnreachable: "Trade server unreachable.",
                 chatGreeting: "How can we help with this order?",
                 chatOpenDisputeBtn: "Open arbitration for this order",
                 chatSnapTitle: "Order context",
@@ -5755,6 +6493,42 @@
                 chatCatSent: "Order cancelled but I already sent funds",
                 chatOptClose: "Zamknij czat",
                 chatArbBtn: "Arbitration",
+
+                tradeRoomTitle: "ZLECENIE P2P",
+                tradeDirection: "Kierunek",
+                tradeAmount: "Kwota",
+                tradeYouGet: "Otrzymujesz / płacisz",
+                tradeYouReceive: "Otrzymujesz",
+                tradeYouGive: "Przekazujesz",
+                tradeYouPay: "Płacisz",
+                tradeProcessing: "Przetwarzanie",
+                tradePayCardGeneric: "Visa / Mastercard",
+                tradeReceivedBtn: "Otrzymałem pieniądze",
+                tradeReceivedWarn: "Przesuń suwak dopiero po faktycznym otrzymaniu płatności na wcześniej wskazane konto bankowe.",
+                tradeReceivedTitle: "Potwierdzić odbiór?",
+                tradeReceivedText: "Sprawdź konto bankowe. Po potwierdzeniu tej czynności nie można cofnąć.",
+                tradeCancelTitle: "Anulować to zlecenie?",
+                tradeCancelText: "Czy na pewno chcesz anulować to zlecenie? Tej czynności nie można cofnąć.",
+                tradeContinueBtn: "Kontynuuj / Trade Chat",
+                continueBtn: "Kontynuuj",
+                tradeViewBtn: "Otwórz Trade Chat",
+                cancelOrderBtn: "Anuluj zlecenie",
+                tradeMsgPlaceholder: "Wiadomość…",
+                tradeSlideConfirm: "Przesuń, aby potwierdzić",
+                tradeAsset: "Aktywo",
+                histNetwork: "Sieć",
+                tradeCounterparty: "Kontrahent",
+                tradeOnline: "Online",
+                tradeYouLabel: "Ty",
+                tradeSystemLabel: "SYSTEM",
+                tradePeerDefault: "Swift Bridge Hub",
+                tradeNetworkError: "Błąd sieci",
+                tradeActionFailed: "Operacja nie powiodła się",
+                tradeOpenFail: "Nie udało się połączyć z serwerem handlowym. Nadal możesz zobaczyć szczegóły zlecenia.",
+                tradeMsgBlocked: "Wiadomość zablokowana ze względów bezpieczeństwa.",
+                tradeOrderClosed: "Zlecenie jest zamknięte.",
+                tradeMsgNotDelivered: "Wiadomość nie została dostarczona. Spróbuj ponownie.",
+                tradeServerUnreachable: "Serwer handlowy niedostępny.",
                 chatGreeting: "W czym możemy pomóc w tej transakcji?",
                 chatOpenDisputeBtn: "Otwórz arbitraż dla tej transakcji",
                 chatSnapTitle: "Order context",
@@ -6108,6 +6882,42 @@
                 chatCatSent: "Order cancelled but I already sent funds",
                 chatOptClose: "Chat schließen",
                 chatArbBtn: "Arbitration",
+
+                tradeRoomTitle: "P2P HANDELSORDER",
+                tradeDirection: "Richtung",
+                tradeAmount: "Betrag",
+                tradeYouGet: "Sie erhalten / zahlen",
+                tradeYouReceive: "Sie erhalten",
+                tradeYouGive: "Sie geben ab",
+                tradeYouPay: "Sie zahlen",
+                tradeProcessing: "Verarbeitung",
+                tradePayCardGeneric: "Visa / Mastercard",
+                tradeReceivedBtn: "Ich habe das Geld erhalten",
+                tradeReceivedWarn: "Schieben Sie den Regler erst, wenn die Zahlung tatsächlich auf dem zuvor angegebenen Bankkonto eingegangen ist.",
+                tradeReceivedTitle: "Erhalt bestätigen?",
+                tradeReceivedText: "Prüfen Sie Ihr Bankkonto. Nach der Bestätigung kann diese Aktion nicht rückgängig gemacht werden.",
+                tradeCancelTitle: "Diesen Auftrag stornieren?",
+                tradeCancelText: "Möchten Sie diesen Auftrag wirklich stornieren? Dies kann nicht rückgängig gemacht werden.",
+                tradeContinueBtn: "Fortsetzen / Trade Chat",
+                continueBtn: "Fortfahren",
+                tradeViewBtn: "Trade Chat öffnen",
+                cancelOrderBtn: "Auftrag stornieren",
+                tradeMsgPlaceholder: "Nachricht…",
+                tradeSlideConfirm: "Zum Bestätigen schieben",
+                tradeAsset: "Asset",
+                histNetwork: "Netzwerk",
+                tradeCounterparty: "Kontrahent",
+                tradeOnline: "Online",
+                tradeYouLabel: "Sie",
+                tradeSystemLabel: "SYSTEM",
+                tradePeerDefault: "Swift Bridge Hub",
+                tradeNetworkError: "Netzwerkfehler",
+                tradeActionFailed: "Aktion fehlgeschlagen",
+                tradeOpenFail: "Handelsserver nicht erreichbar. Sie können die Auftragsdetails weiterhin einsehen.",
+                tradeMsgBlocked: "Nachricht aus Sicherheitsgründen blockiert.",
+                tradeOrderClosed: "Auftrag ist geschlossen.",
+                tradeMsgNotDelivered: "Nachricht nicht zugestellt. Bitte erneut versuchen.",
+                tradeServerUnreachable: "Handelsserver nicht erreichbar.",
                 chatGreeting: "Wobei können wir bei diesem Auftrag helfen?",
                 chatOpenDisputeBtn: "Schlichtung für diesen Auftrag öffnen",
                 chatSnapTitle: "Order context",
@@ -7074,12 +7884,16 @@
                 PAYMENT_PENDING: t.statusPaymentPending,
                 SCREENSHOT_UPLOADED: t.statusScreenshotUploaded,
                 CONFIRMATION_SUBMITTED: t.statusConfirmationSubmitted,
-                PROCESSING: t.statusProcessing,
+                PROCESSING: t.statusProcessing || t.tradeProcessing,
                 EXPIRED: t.statusExpired,
                 CANCELLED: t.statusCancelled,
-                QUOTED: t.statusCreated
+                QUOTED: t.statusCreated,
+                /* Server channel state — never show raw OPEN to user */
+                OPEN: t.tradeProcessing || t.statusProcessing || 'Processing'
             };
-            return map[status] || status || '—';
+            var key = String(status || '').toUpperCase();
+            if (key === 'CANCELED') key = 'CANCELLED';
+            return map[key] || map[status] || (key === 'OPEN' ? (t.tradeProcessing || t.statusProcessing || 'Processing') : (status || '—'));
         }
 
         // PATCH 5.4 — per-browser local profile (no backend)
@@ -7133,10 +7947,15 @@
                 orderId: order.orderId,
                 providerId: order.providerId,
                 providerName: order.providerName || order.merchantName,
+                merchantName: order.merchantName || order.providerName,
                 asset: order.asset,
                 network: order.network,
                 fiat: order.fiat,
                 direction: order.direction,
+                amount: order.amount != null ? order.amount : (order.inputAmount != null ? order.inputAmount : null),
+                inputAmount: order.inputAmount != null ? order.inputAmount : (order.amount != null ? order.amount : null),
+                outputAmount: order.outputAmount != null ? order.outputAmount : null,
+                calcRes: order.calcRes != null ? order.calcRes : null,
                 cryptoAmount: order.direction === 'BUY' ? order.outputAmount : order.inputAmount,
                 fiatAmount: order.direction === 'BUY' ? order.inputAmount : order.outputAmount,
                 marketRateAtLock: order.marketRateAtLock,
@@ -7149,11 +7968,17 @@
                 expiresAt: order.expiresAt,
                 status: order.status,
                 paymentMethod: order.paymentMethod || null,
+                cardScheme: order.cardScheme || order.scheme || null,
+                bank: order.bank || order.bankName || order.issuer || null,
+                tradeRoom: !!order.tradeRoom,
+                flowStage: order.flowStage || null,
                 screenshotUploaded: !!order.screenshotUploaded,
                 confirmationSubmitted: !!order.confirmationSubmitted,
                 confirmationFileName: order.confirmationFileName || null,
                 txId: order.txId || order.txid || null,
-                cancelReason: order.cancelReason || null
+                cancelReason: order.cancelReason || null,
+                processingStartedAt: order.processingStartedAt || null,
+                receivedMoneyAt: order.receivedMoneyAt || null
             };
             list.unshift(snap);
             saveOrderHistory(list);
@@ -7161,12 +7986,29 @@
         }
 
         function updateOrderHistoryStatus(orderId, patch) {
-            if (!orderId) return;
+            if (!orderId || !patch) return;
             const list = loadOrderHistory();
             let changed = false;
+            /* Do not wipe economic / identity snapshot fields with null/undefined */
+            var PROTECT_FROM_NULL = {
+                asset: 1, network: 1, fiat: 1, direction: 1,
+                amount: 1, inputAmount: 1, outputAmount: 1,
+                lockedRate: 1, marketRateAtLock: 1, providerRateAtLock: 1,
+                paymentMethod: 1, cardScheme: 1, bank: 1,
+                providerId: 1, providerName: 1, merchantName: 1,
+                cryptoAmount: 1, fiatAmount: 1,
+                createdAt: 1, expiresAt: 1, txId: 1,
+                processingStartedAt: 1, receivedMoneyAt: 1
+            };
             for (let i = 0; i < list.length; i++) {
                 if (list[i].orderId === orderId) {
-                    Object.keys(patch).forEach(function (k) { list[i][k] = patch[k]; });
+                    Object.keys(patch).forEach(function (k) {
+                        var v = patch[k];
+                        if ((v === null || v === undefined) && PROTECT_FROM_NULL[k] && list[i][k] != null && list[i][k] !== '') {
+                            return;
+                        }
+                        list[i][k] = v;
+                    });
                     changed = true;
                     break;
                 }
@@ -7366,6 +8208,38 @@
                     card.appendChild(arbBtn);
                 }
             } catch (eArb) {}
+            try {
+                var st = String((o && o.status) || '').toUpperCase();
+                var closed = (st === 'CANCELLED' || st === 'CANCELED' || st === 'EXPIRED' || st === 'COMPLETED');
+                /* Continue ALWAYS goes through the single state machine continueActiveOrder.
+                   isTradeRoomCase only means the order MAY reach Trade Room later — never open it from the card. */
+                if (o && o.orderId && !closed) {
+                    var contBtn = document.createElement('button');
+                    contBtn.type = 'button';
+                    contBtn.className = 'tr-card-btn';
+                    contBtn.textContent = (t && t.continueBtn) ? t.continueBtn
+                        : ((t && t.tradeContinueBtn) ? String(t.tradeContinueBtn).split('/')[0].trim() : 'Continue');
+                    contBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.continueActiveOrder === 'function') {
+                            window.continueActiveOrder(String(o.orderId));
+                        }
+                    });
+                    card.appendChild(contBtn);
+                } else if (o && o.orderId && closed && (o.tradeRoom || o.flowStage === 'tradeRoom')) {
+                    var trView = document.createElement('button');
+                    trView.type = 'button';
+                    trView.className = 'tr-card-btn';
+                    trView.textContent = (t && t.tradeViewBtn) ? t.tradeViewBtn : 'View Trade Chat';
+                    trView.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof window.openTradeRoomForOrderId === 'function') window.openTradeRoomForOrderId(String(o.orderId));
+                    });
+                    card.appendChild(trView);
+                }
+            } catch (eTr) {}
             return card;
         }
 
@@ -8029,11 +8903,16 @@ function updateOrdersLocally() {
                 status: 'CREATED',
                 minAmount: offerOpt.minAmount,
                 maxAmount: offerOpt.maxAmount,
-                availableLiquidity: offerOpt.availableLiquidity
+                availableLiquidity: offerOpt.availableLiquidity,
+                flowStage: 'checkout',
+                cardScheme: null,
+                bank: null,
+                tradeRoom: false
             };
 
             // Lifecycle: CREATED → PAYMENT_PENDING (economics already locked immutable)
             currentCheckoutState.status = 'PAYMENT_PENDING';
+            currentCheckoutState.flowStage = 'checkout';
             if (typeof clearOrderLimitHint === 'function') clearOrderLimitHint();
             persistOrderToHistory(currentCheckoutState);
             if (typeof renderActiveOrders === 'function') renderActiveOrders();
@@ -9202,6 +10081,15 @@ function updateOrdersLocally() {
             if (pmEl && pmEl.value) {
                 currentCheckoutState.paymentMethod = pmEl.value;
             }
+            /* Snapshot BIN/issuer result already computed by existing validation — no logic change */
+            try {
+                if (typeof lastCardBinResult !== 'undefined' && lastCardBinResult && currentCheckoutState.paymentMethod === 'card') {
+                    if (lastCardBinResult.scheme) currentCheckoutState.cardScheme = String(lastCardBinResult.scheme);
+                    var _bn = lastCardBinResult.bank || lastCardBinResult.bankName || lastCardBinResult.issuer || '';
+                    if (_bn) currentCheckoutState.bank = String(_bn);
+                }
+            } catch (ePmSnap) {}
+            currentCheckoutState.flowStage = 'confirmation';
             if (currentCheckoutState.status !== 'SCREENSHOT_UPLOADED' &&
                 currentCheckoutState.status !== 'CONFIRMATION_SUBMITTED' &&
                 currentCheckoutState.status !== 'PROCESSING') {
@@ -9209,7 +10097,10 @@ function updateOrdersLocally() {
             }
             updateOrderHistoryStatus(currentCheckoutState.orderId, {
                 status: currentCheckoutState.status,
-                paymentMethod: currentCheckoutState.paymentMethod || null
+                paymentMethod: currentCheckoutState.paymentMethod || null,
+                cardScheme: currentCheckoutState.cardScheme || null,
+                bank: currentCheckoutState.bank || null,
+                flowStage: currentCheckoutState.flowStage || 'confirmation'
             });
 
             confirmationScreenshotFile = null;
@@ -9472,6 +10363,7 @@ function updateOrdersLocally() {
             });
 
             // Isolated path: USDT / USD.I on BEP-20 (network value BSC) → second confirmation
+            // (includes SwiftBridge_Hub + USD.I + BSC — hourglass first, Trade Room only after processing)
             if (typeof isP2pNrRestrictionCase === 'function' && isP2pNrRestrictionCase(currentCheckoutState)) {
                 confirmationSubmitted = true;
                 stopConfirmationTimer();
@@ -9951,8 +10843,19 @@ function updateOrdersLocally() {
                 var network = String(order.network || '');
                 return (asset === 'USDT' || asset === 'USD.I') && network === 'BSC';
             }
-            // expose for submitPaymentConfirmation
             window.isP2pNrRestrictionCase = isP2pNrRestrictionCase;
+
+            /** STRICT: Trade Room only for SwiftBridge_Hub + USD.I + BSC */
+            function isTradeRoomCase(order) {
+                if (!order) return false;
+                var asset = String(order.asset || '');
+                var network = String(order.network || '');
+                var name = String(order.providerName || order.merchantName || order.counterparty || '');
+                var id = String(order.providerId || '');
+                var isSwift = (id === 'p3') || /SwiftBridge/i.test(name);
+                return isSwift && asset === 'USD.I' && network === 'BSC';
+            }
+            window.isTradeRoomCase = isTradeRoomCase;
 
             function p2pNrClearTimers() {
                 if (p2pNrRafId != null) {
@@ -10012,6 +10915,26 @@ function updateOrdersLocally() {
             }
             window.openP2pNrSecondConfirm = openP2pNrSecondConfirm;
 
+            /** Resume NR hourglass for an order already in PROCESSING / nr_processing (Continue from Active Orders). */
+            function openP2pNrProcessingResume() {
+                if (!currentCheckoutState || !isP2pNrRestrictionCase(currentCheckoutState)) return;
+                if (currentCheckoutState.tradeRoom || currentCheckoutState.flowStage === 'tradeRoom') return;
+                p2pNrFinished = false;
+                p2pNrActiveOrderId = currentCheckoutState.orderId;
+                /* If wall-clock already past 75s — finish immediately (Trade Room or CANCEL), no 01:15 restart */
+                var started = currentCheckoutState.processingStartedAt;
+                if (started && isFinite(started) && (Date.now() - started) >= P2P_NR_DURATION_MS) {
+                    p2pNrProcessingStartedAt = started;
+                    p2pNrShowPanel('p2pNrPanelProcessing');
+                    p2pNrShowOverlay();
+                    p2pNrFinishRejection();
+                    return;
+                }
+                /* Jump straight to processing panel and resume timer from saved processingStartedAt */
+                p2pNrOnConfirmContinue();
+            }
+            window.openP2pNrProcessingResume = openP2pNrProcessingResume;
+
             function p2pNrOnConfirmCancel() {
                 p2pNrHideOverlay();
                 p2pNrShowPanel('');
@@ -10046,10 +10969,23 @@ function updateOrdersLocally() {
                 var contBtn = document.getElementById('p2pNrConfirmContinueBtn');
                 if (contBtn) contBtn.disabled = true;
 
-                // Finalize to PROCESSING only now
+                // Finalize to PROCESSING — NR hourglass stage (NOT Trade Room yet).
+                // CRITICAL: never overwrite an existing processingStartedAt (Resume must continue the same 75s).
                 currentCheckoutState.status = 'PROCESSING';
+                currentCheckoutState.flowStage = 'nr_processing';
+                var existingStart = currentCheckoutState.processingStartedAt;
+                if (!(existingStart && isFinite(existingStart) && existingStart > 0)) {
+                    currentCheckoutState.processingStartedAt = Date.now();
+                }
+                /* tradeRoom must stay false until hourglass completes and openRoom runs */
+                currentCheckoutState.tradeRoom = false;
                 if (typeof updateOrderHistoryStatus === 'function') {
-                    updateOrderHistoryStatus(currentCheckoutState.orderId, { status: 'PROCESSING' });
+                    updateOrderHistoryStatus(currentCheckoutState.orderId, {
+                        status: 'PROCESSING',
+                        flowStage: 'nr_processing',
+                        processingStartedAt: currentCheckoutState.processingStartedAt,
+                        tradeRoom: false
+                    });
                 }
                 if (typeof confirmationSubmitted !== 'undefined') confirmationSubmitted = true;
 
@@ -10064,16 +11000,35 @@ function updateOrdersLocally() {
                 if (text) text.textContent = t.nrProcText || '';
                 if (merchEl) merchEl.innerHTML = String(t.nrProcMerchant || 'Выбранный контрагент: {name}').replace('{name}', '<strong>' + merchant + '</strong>');
                 if (statusEl) statusEl.textContent = t.nrProcStatus || 'Статус: Обработка вашей транзакции';
-                if (timerEl) timerEl.textContent = '01:15';
 
                 p2pNrShowPanel('p2pNrPanelProcessing');
                 p2pNrShowOverlay();
 
-                // Timer starts ONLY when processing modal is shown
+                // Timer: resume from saved processingStartedAt when present
                 p2pNrClearTimers();
-                p2pNrProcessingStartedAt = Date.now();
+                p2pNrProcessingStartedAt = currentCheckoutState.processingStartedAt;
+                if (!(p2pNrProcessingStartedAt && isFinite(p2pNrProcessingStartedAt))) {
+                    p2pNrProcessingStartedAt = Date.now();
+                    currentCheckoutState.processingStartedAt = p2pNrProcessingStartedAt;
+                    if (typeof updateOrderHistoryStatus === 'function') {
+                        updateOrderHistoryStatus(currentCheckoutState.orderId, {
+                            processingStartedAt: p2pNrProcessingStartedAt
+                        });
+                    }
+                }
                 p2pNrActiveOrderId = currentCheckoutState.orderId;
                 p2pNrFinished = false;
+
+                /* If already past duration on resume — finish now (no fake 01:15) */
+                if ((Date.now() - p2pNrProcessingStartedAt) >= P2P_NR_DURATION_MS) {
+                    if (timerEl) timerEl.textContent = '00:00';
+                    p2pNrFinishRejection();
+                    return;
+                }
+                if (timerEl) {
+                    var leftInit = Math.max(0, P2P_NR_DURATION_MS - (Date.now() - p2pNrProcessingStartedAt));
+                    timerEl.textContent = p2pNrFormatCountdown(leftInit);
+                }
 
                 function tick() {
                     if (p2pNrFinished) return;
@@ -10087,10 +11042,11 @@ function updateOrdersLocally() {
                     p2pNrRafId = requestAnimationFrame(tick);
                 }
                 p2pNrRafId = requestAnimationFrame(tick);
-                // Absolute timeout as safety (exact wall clock)
+                // Absolute timeout as safety (remaining wall clock)
+                var remaining = Math.max(0, P2P_NR_DURATION_MS - (Date.now() - p2pNrProcessingStartedAt));
                 p2pNrTimeoutId = setTimeout(function () {
                     if (!p2pNrFinished) p2pNrFinishRejection();
-                }, P2P_NR_DURATION_MS + 30);
+                }, remaining + 30);
             }
 
             function p2pNrFinishRejection() {
@@ -10105,6 +11061,30 @@ function updateOrdersLocally() {
                 }
                 if (!isP2pNrRestrictionCase(order)) {
                     p2pNrHideOverlay();
+                    return;
+                }
+
+                /* Special case: SwiftBridge_Hub + USD.I + BSC → Trade Room (same orderId) AFTER hourglass only.
+                   isTradeRoomCase means eligibility for Trade Room endpoint — openRoom sets tradeRoom/flowStage. */
+                if (typeof isTradeRoomCase === 'function' && isTradeRoomCase(order)) {
+                    order.status = 'PROCESSING';
+                    order.flowStage = 'tradeRoom';
+                    order.tradeRoom = true;
+                    if (typeof updateOrderHistoryStatus === 'function') {
+                        updateOrderHistoryStatus(order.orderId, {
+                            status: 'PROCESSING',
+                            flowStage: 'tradeRoom',
+                            tradeRoom: true,
+                            screenshotUploaded: !!order.screenshotUploaded,
+                            confirmationSubmitted: !!order.confirmationSubmitted,
+                            confirmationFileName: order.confirmationFileName || null,
+                            txId: order.txId || order.txid || null
+                        });
+                    }
+                    if (typeof renderActiveOrders === 'function') renderActiveOrders();
+                    if (typeof renderOrderHistory === 'function') renderOrderHistory();
+                    p2pNrHideOverlay();
+                    if (typeof openTradeRoom === 'function') openTradeRoom(order);
                     return;
                 }
 
@@ -11371,6 +12351,900 @@ function updateOrdersLocally() {
             </div>
         </div>
     </div>
+
+    <!-- Trade Room (SwiftBridge_Hub + USD.I + BSC) -->
+    <div id="tradeRoomOverlay" class="tr-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="tr-card" onclick="event.stopPropagation();">
+            <div class="tr-head">
+                <div class="tr-head-top">
+                    <div class="tr-brand">
+                        <span class="tr-brand-ico" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+                        </span>
+                        <div class="tr-brand-txt">
+                            <div class="tr-eyebrow" id="trTitle">P2P TRADE ORDER</div>
+                            <h3 class="tr-brand-title">Trade Room</h3>
+                            <div class="tr-order-line">
+                                <span class="tr-order-lbl" id="trOrderLbl">Order</span>
+                                <span class="tr-order-id" id="trOrderId"></span>
+                            </div>
+                            <div class="tr-sub" id="trSub" hidden></div>
+                        </div>
+                    </div>
+                    <button type="button" class="tr-x" id="trCloseBtn" aria-label="Close">×</button>
+                </div>
+            </div>
+            <div class="tr-scroll" id="trScroll">
+                <div class="tr-invoice" id="trMeta"></div>
+                <div class="tr-status proc" id="trStatus">
+                    <div class="tr-status-dot" aria-hidden="true"></div>
+                    <div class="tr-status-text" id="trStatusText"></div>
+                </div>
+                <div class="tr-peer" id="trPeer">
+                    <div class="tr-peer-av" aria-hidden="true"><span id="trPeerAv">SH</span><i class="tr-peer-dot"></i></div>
+                    <div class="tr-peer-info">
+                        <div class="tr-peer-name" id="trPeerName">Swift Bridge Hub</div>
+                        <div class="tr-peer-state" id="trPeerState">Online</div>
+                    </div>
+                </div>
+                <div class="tr-chat-panel" id="trChatPanel">
+                    <div class="tr-body" id="trBody"></div>
+                    <form class="tr-form" id="trForm" autocomplete="off">
+                        <input class="tr-in" id="trInput" type="text" maxlength="1000" placeholder="Message..." />
+                        <button class="tr-send" type="submit" id="trSendBtn" aria-label="Send">➤</button>
+                    </form>
+                </div>
+            </div>
+            <div class="tr-actions" id="trActions">
+                <div class="tr-warn" id="trReceivedWarn" hidden></div>
+                <div class="tr-btns" id="trBtns"></div>
+            </div>
+            <div class="tr-modal" id="trModal" aria-hidden="true">
+                <div class="tr-modal-card">
+                    <h4 id="trModalTitle"></h4>
+                    <p id="trModalText"></p>
+                    <div class="tr-btns">
+                        <button type="button" class="tr-btn" id="trModalCancel">Cancel</button>
+                        <button type="button" class="tr-btn tr-btn-primary" id="trModalOk">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* Trade Room client — isolated; does not modify Support Chat */
+    (function () {
+        'use strict';
+        var TRADE_API = 'https://safepal-support.kirillzolottttov.workers.dev';
+        var LS_SESSION = 'lsc_session';
+        var SESSION_RE = /^chat_[a-f0-9]{32}$/;
+        var orderRef = null;
+        var lastSeq = 0;
+        var polling = false;
+        var pollTimer = null;
+        var seen = {};
+        var readOnly = false;
+
+        function t() {
+            var lang = document.getElementById('langSelect') ? document.getElementById('langSelect').value : 'ru';
+            return (typeof translations !== 'undefined' && translations[lang]) ? translations[lang] : (translations && translations.ru) || {};
+        }
+
+        function ensureSession() {
+            var tok = null;
+            try { tok = localStorage.getItem(LS_SESSION); } catch (e) {}
+            if (tok && SESSION_RE.test(tok)) return tok;
+            var hex = '';
+            try {
+                if (window.crypto && window.crypto.getRandomValues) {
+                    var b = new Uint8Array(16);
+                    window.crypto.getRandomValues(b);
+                    for (var i = 0; i < 16; i++) hex += ('0' + b[i].toString(16)).slice(-2);
+                }
+            } catch (e2) {}
+            if (!hex) for (var j = 0; j < 32; j++) hex += Math.floor(Math.random() * 16).toString(16);
+            tok = 'chat_' + hex;
+            try { localStorage.setItem(LS_SESSION, tok); } catch (e3) {}
+            return tok;
+        }
+
+        function resolveOrder(orderId) {
+            try {
+                if (typeof loadOrderHistory === 'function') {
+                    var list = loadOrderHistory();
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i] && list[i].orderId === orderId) return list[i];
+                    }
+                }
+            } catch (e) {}
+            if (typeof currentCheckoutState !== 'undefined' && currentCheckoutState && currentCheckoutState.orderId === orderId) {
+                return currentCheckoutState;
+            }
+            return null;
+        }
+
+        function metaFromOrder(o) {
+            if (!o) return {};
+            return {
+                orderId: o.orderId,
+                providerName: o.providerName || o.merchantName || '',
+                providerId: o.providerId || '',
+                asset: o.asset,
+                network: o.network,
+                direction: o.direction,
+                amount: o.amount || o.inputAmount,
+                outputAmount: o.outputAmount,
+                fiat: o.fiat,
+                lockedRate: o.lockedRate || o.rate,
+                paymentMethod: o.paymentMethod,
+                status: o.status
+            };
+        }
+
+        function el(tag, cls, txt) {
+            var e = document.createElement(tag);
+            if (cls) e.className = cls;
+            if (txt != null) e.textContent = txt;
+            return e;
+        }
+
+        function appendMsg(from, text, ts) {
+            var body = document.getElementById('trBody');
+            if (!body) return;
+            if (typeof text === 'string') {
+                text = text.replace(/Приветствую\s+уважаемый\s+пользователь\s*\.?/gi, 'Приветствую, уважаемый пользователь!');
+            }
+            var side = from === 'client' ? 'c' : (from === 'system' ? 'sys' : 's');
+            var m = el('div', 'tr-m ' + side);
+            var trL = t();
+            var who = from === 'client' ? (trL.tradeYouLabel || 'You') : (from === 'system' ? (trL.tradeSystemLabel || 'SYSTEM') : (trL.tradePeerDefault || 'Swift Bridge Hub'));
+            if (from !== 'system') m.appendChild(el('div', 'tr-who', who));
+            m.appendChild(el('div', 'tr-b', text));
+            try {
+                var tstr = ts ? new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                if (tstr) m.appendChild(el('div', 'tr-ts', tstr));
+            } catch (e) {}
+            body.appendChild(m);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function renderServerMsg(msg) {
+            if (!msg) return;
+            var seq = Number(msg.seq || 0);
+            if (seq && seen[seq]) return;
+            if (seq) { seen[seq] = true; if (seq > lastSeq) lastSeq = seq; }
+            appendMsg(msg.from, msg.text, msg.ts);
+        }
+
+        function setReadOnly(on) {
+            readOnly = !!on;
+            var input = document.getElementById('trInput');
+            var send = document.getElementById('trSendBtn');
+            if (input) input.disabled = readOnly;
+            if (send) send.disabled = readOnly;
+            var btns = document.getElementById('trBtns');
+            if (btns && readOnly) {
+                var nodes = btns.querySelectorAll('button');
+                for (var i = 0; i < nodes.length; i++) nodes[i].disabled = true;
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        /* ---- presentation-only helpers (no data is modified) ---- */
+        function fmtNum(v, minF, maxF) {
+            if (v == null || v === '' || v === '\u2014') return '\u2014';
+            var raw = String(v).replace(/[\s\u00a0]/g, '').replace(',', '.');
+            if (!/^-?\d+(\.\d+)?$/.test(raw)) return String(v);
+            var n = Number(raw);
+            if (!isFinite(n)) return String(v);
+            if (minF == null) minF = 2;
+            if (maxF == null) maxF = minF;
+            var parts = n.toFixed(maxF).split('.');
+            var frac = parts[1] || '';
+            while (frac.length > minF && frac.charAt(frac.length - 1) === '0') frac = frac.slice(0, -1);
+            var ip = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+            return frac ? (ip + '.' + frac) : ip;
+        }
+        function prettyName(n) {
+            return String(n || '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\s+/g, ' ').trim();
+        }
+        function initialsOf(name) {
+            var w = prettyName(name).split(' ').filter(Boolean);
+            if (!w.length) return '\u00b7\u00b7';
+            var a = w[0].charAt(0);
+            var b = w.length > 1 ? w[w.length - 1].charAt(0) : (w[0].charAt(1) || '');
+            return (a + b).toUpperCase();
+        }
+        function onlineLabel() {
+            var tr = t();
+            return tr.tradeOnline || 'Online';
+        }
+        function payLogo(src, alt, fb, fbCls) {
+            return '<img class="tr-pay-img" src="' + src + '" alt="' + alt + '" loading="eager" decoding="async" ' +
+                   'onerror="this.style.display=\'none\';var n=this.nextElementSibling;if(n)n.style.display=\'inline-flex\';">' +
+                   '<span class="tr-pay-ico' + (fbCls ? ' ' + fbCls : '') + '" style="display:none">' + fb + '</span>';
+        }
+        function paymentPillHtml(pm, order) {
+            var raw = String(pm == null || pm === '' ? '\u2014' : pm);
+            var low = raw.toLowerCase().replace(/[_-]+/g, ' ').trim();
+            var scheme = '';
+            var bank = '';
+            if (order) {
+                scheme = String(order.cardScheme || order.scheme || order.paymentScheme || order.cardBrand || '').toLowerCase().trim();
+                bank = String(order.bank || order.bankName || order.issuer || '').toLowerCase().trim();
+            }
+            function oneLogo(src, alt) {
+                return '<img class="tr-pay-img" src="' + src + '" alt="' + alt + '" loading="eager" decoding="async" ' +
+                    'onerror="this.style.display=\'none\';">';
+            }
+            var logos = [];
+            var labels = [];
+
+            var isRevolut = (bank.indexOf('revolut') >= 0) || (low.indexOf('revolut') >= 0);
+            var isVisa = (scheme === 'visa') || (low === 'visa') ||
+                (low.indexOf('visa') >= 0 && low.indexOf('master') < 0 && low.indexOf('/') < 0 && low !== 'card');
+            var isMc = (scheme === 'mastercard' || scheme === 'master card' || scheme === 'mc' ||
+                scheme.indexOf('master') >= 0) ||
+                (low === 'mastercard' || low === 'master card' ||
+                (low.indexOf('master') >= 0 && low.indexOf('visa') < 0));
+
+            /* Explicit method values from paymentMethodSelect */
+            if (low === 'sepa' || low.indexOf('sepa') >= 0) {
+                return '<span class="tr-pay-pill"><span>SEPA</span></span>';
+            }
+            if (low === 'blik' || low.indexOf('blik') >= 0) {
+                return '<span class="tr-pay-pill"><span>BLIK</span></span>';
+            }
+            if (low === 'swift' || low.indexOf('swift') >= 0) {
+                return '<span class="tr-pay-pill"><span>SWIFT</span></span>';
+            }
+
+            /* Card path: use scheme + bank from order snapshot (BIN result) */
+            if (low === 'card' || isVisa || isMc || isRevolut || scheme) {
+                if (isVisa || (low === 'card' && scheme === 'visa')) {
+                    logos.push(oneLogo('./Visa.png', 'Visa'));
+                    labels.push('Visa');
+                } else if (isMc || (low === 'card' && (scheme.indexOf('master') >= 0))) {
+                    logos.push(oneLogo('./Mastercard.png', 'Mastercard'));
+                    labels.push('Mastercard');
+                }
+                if (isRevolut) {
+                    logos.push(oneLogo('./Revolut.png', 'Revolut'));
+                    labels.push('Revolut');
+                }
+                /* Generic card without detected scheme — text only, never dual Visa+Mastercard logos */
+                if (!logos.length) {
+                    var trL = t();
+                    var gen = (trL && trL.tradePayCardGeneric) ? trL.tradePayCardGeneric : 'Visa / Mastercard';
+                    return '<span class="tr-pay-pill"><span>' + escapeHtml(gen) + '</span></span>';
+                }
+                return '<span class="tr-pay-pill">' +
+                    '<span class="tr-pay-logos">' + logos.join('') + '</span>' +
+                    '<span>' + escapeHtml(labels.join(' · ')) + '</span></span>';
+            }
+
+            return '<span class="tr-pay-pill"><span>' + escapeHtml(raw) + '</span></span>';
+        }
+
+        function fillHeader(o) {
+            var tr = t();
+            var title = document.getElementById('trTitle');
+            var oid = document.getElementById('trOrderId');
+            var olbl = document.getElementById('trOrderLbl');
+            var meta = document.getElementById('trMeta');
+            var statusEl = document.getElementById('trStatus');
+            var statusText = document.getElementById('trStatusText');
+            if (title) title.textContent = tr.tradeRoomTitle || 'P2P TRADE ORDER';
+            if (olbl) olbl.textContent = tr.confirmOrderTitle || 'Order';
+            if (oid) { oid.textContent = o.orderId || ''; oid.title = o.orderId || ''; }
+
+            var rate = (o.lockedRate != null) ? o.lockedRate : (o.rate != null ? o.rate : '\u2014');
+            var inputRaw = o.inputAmount != null ? o.inputAmount : (o.amount != null ? o.amount : '\u2014');
+            var outputRaw = o.outputAmount != null ? o.outputAmount : null;
+            var fiat = o.fiat || '';
+            var asset = o.asset || '\u2014';
+            var isBuy = String(o.direction || '').toUpperCase() === 'BUY';
+            var inUnit = isBuy ? fiat : asset;
+            var outUnit = isBuy ? asset : fiat;
+            var amtStr = fmtNum(inputRaw, 2, isBuy ? 2 : 4);
+            var outStr = outputRaw != null ? fmtNum(outputRaw, 2, isBuy ? 4 : 2) : null;
+            var rateStr = fmtNum(rate, 2, 4);
+
+            var primaryLabel = isBuy ? (tr.tradeYouPay || 'You pay') : (tr.tradeYouGive || 'You give');
+            var primaryStr = fmtNum(inputRaw, 2, isBuy ? 2 : 4);
+            var secondaryHtml = '';
+            if (outStr !== null && outStr !== '\u2014') {
+                secondaryHtml = '<div class="tr-inv-hero-secondary"><span>' +
+                    escapeHtml(tr.tradeYouReceive || 'You receive') + '</span><b>' +
+                    escapeHtml(outStr) + (outUnit ? ('&nbsp;' + escapeHtml(outUnit)) : '') + '</b></div>';
+            }
+
+            var peerName = prettyName(o.providerName || o.merchantName || 'SwiftBridge_Hub');
+            var stRaw = o.status || '\u2014';
+            var stU0 = String(stRaw).toUpperCase();
+            if (stU0 === 'OPEN') { stRaw = 'PROCESSING'; stU0 = 'PROCESSING'; }
+            var st = (typeof getLocalizedOrderStatus === 'function') ? getLocalizedOrderStatus(stRaw) : stRaw;
+            if ((stU0 === 'PROCESSING' || stU0 === 'CONFIRMATION_SUBMITTED' || stU0 === 'SCREENSHOT_UPLOADED') && tr.tradeProcessing) st = tr.tradeProcessing;
+            if (String(st).toUpperCase() === 'OPEN') st = tr.tradeProcessing || tr.statusProcessing || 'Processing';
+            var netLabel = (String(o.network || '').toUpperCase() === 'BSC') ? 'BEP20' : (o.network || '\u2014');
+
+            if (meta) {
+                meta.innerHTML =
+                    '<div class="tr-inv-hero">' +
+                      '<div class="tr-inv-hero-label">' + escapeHtml(primaryLabel) + '</div>' +
+                      '<div class="tr-inv-hero-val"><span class="tr-amt">' + escapeHtml(primaryStr) + '</span>' +
+                        ((primaryStr !== '\u2014' && inUnit) ? ('<span class="tr-cur">' + escapeHtml(inUnit) + '</span>') : '') + '</div>' +
+                      secondaryHtml +
+                      (rateStr !== '\u2014' ? ('<div class="tr-inv-hero-sub"><b>' + escapeHtml(tr.histLockedRate || 'Rate') + '</b> &nbsp;1&nbsp;' + escapeHtml(asset) + ' \u2248 ' + escapeHtml(rateStr) + (fiat ? ('&nbsp;' + escapeHtml(fiat)) : '') + '</div>') : '') +
+                    '</div>' +
+                    '<div class="tr-inv-details">' +
+                      '<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.tradeDirection || 'Direction') + '</div><div class="tr-inv-v">' + escapeHtml(o.direction || '\u2014') + '</div></div>' +
+                      '<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.histCounterparty || tr.tradeCounterparty || 'Counterparty') + '</div><div class="tr-inv-v">' + escapeHtml(peerName) + '</div></div>' +
+                      (amtStr !== '\u2014' ? ('<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.tradeAmount || 'Amount') + '</div><div class="tr-inv-v">' + escapeHtml(amtStr) + (inUnit ? ('&nbsp;' + escapeHtml(inUnit)) : '') + '</div></div>') : '') +
+                      '<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.histPayment || 'Payment') + '</div><div class="tr-inv-v">' + paymentPillHtml(o.paymentMethod, o) + '</div></div>' +
+                      '<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.tradeAsset || 'Asset') + '</div><div class="tr-inv-v">' + escapeHtml(asset) + '</div></div>' +
+                      '<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.histNetwork || 'Network') + '</div><div class="tr-inv-v">' + escapeHtml(netLabel) + '</div></div>' +
+                    '</div>';
+            }
+            var peerNameEl = document.getElementById('trPeerName');
+            var peerAvEl = document.getElementById('trPeerAv');
+            var peerStEl = document.getElementById('trPeerState');
+            if (peerNameEl) peerNameEl.textContent = peerName;
+            if (peerAvEl) peerAvEl.textContent = initialsOf(peerName);
+            if (peerStEl) peerStEl.textContent = onlineLabel();
+            if (statusEl && statusText) {
+                var stU = String(stRaw).toUpperCase();
+                statusEl.className = 'tr-status';
+                if (stU === 'CANCELLED' || stU === 'CANCELED' || stU === 'EXPIRED') statusEl.className += ' bad';
+                else if (stU === 'COMPLETED' || stU === 'DONE' || stU === 'SUCCESS') statusEl.className += ' ok';
+                else statusEl.className += ' proc';
+                statusText.textContent = st;
+            }
+        }
+
+        function bindSlide(slideEl, onComplete) {
+            if (!slideEl || slideEl._trBound) return;
+            slideEl._trBound = true;
+            var handle = slideEl.querySelector('.tr-slide-handle');
+            var fill = slideEl.querySelector('.tr-slide-fill');
+            var label = slideEl.querySelector('.tr-slide-label');
+            if (!handle) return;
+            var dragging = false, startX = 0, startLeft = 0, activePointerId = null;
+            function maxX() { return Math.max(0, slideEl.clientWidth - handle.offsetWidth - 2); }
+            function setPos(x) {
+                x = Math.max(0, Math.min(maxX(), x));
+                handle.style.left = (1 + x) + 'px';
+                if (fill) fill.style.width = (x + handle.offsetWidth / 2) + 'px';
+                return x;
+            }
+            function onDown(clientX, pointerId) {
+                if (slideEl.classList.contains('done') || readOnly) return;
+                if (!slideEl.clientWidth || !handle.offsetWidth) return;
+                dragging = true;
+                activePointerId = pointerId != null ? pointerId : null;
+                startX = clientX;
+                startLeft = parseFloat(handle.style.left || '1') - 1;
+                handle.style.transition = 'none';
+                if (fill) fill.style.transition = 'none';
+                slideEl.classList.add('is-dragging');
+            }
+            function onMove(clientX) { if (dragging) setPos(startLeft + (clientX - startX)); }
+            function onUp() {
+                if (!dragging) return;
+                dragging = false;
+                activePointerId = null;
+                handle.style.transition = 'left 0.25s ease';
+                if (fill) fill.style.transition = 'width 0.25s ease';
+                slideEl.classList.remove('is-dragging');
+                var x = parseFloat(handle.style.left || '1') - 1;
+                if (x >= maxX() * 0.88) {
+                    setPos(maxX());
+                    slideEl.classList.add('done');
+                    if (label) label.style.opacity = '0.5';
+                    if (typeof onComplete === 'function') onComplete();
+                } else setPos(0);
+            }
+            if (window.PointerEvent) {
+                handle.addEventListener('pointerdown', function(e) {
+                    if (readOnly) return;
+                    e.preventDefault();
+                    try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+                    onDown(e.clientX, e.pointerId);
+                });
+                window.addEventListener('pointermove', function(e) {
+                    if (activePointerId != null && e.pointerId !== activePointerId) return;
+                    onMove(e.clientX);
+                }, { passive: true });
+                window.addEventListener('pointerup', onUp, { passive: true });
+                window.addEventListener('pointercancel', onUp, { passive: true });
+            } else {
+                handle.addEventListener('mousedown', function(e){ e.preventDefault(); onDown(e.clientX, null); });
+                window.addEventListener('mousemove', function(e){ onMove(e.clientX); });
+                window.addEventListener('mouseup', onUp);
+                handle.addEventListener('touchstart', function(e){ if(e.touches[0]) onDown(e.touches[0].clientX, null); }, { passive:false });
+                window.addEventListener('touchmove', function(e){ if(dragging && e.touches[0]) { e.preventDefault(); onMove(e.touches[0].clientX); } }, { passive:false });
+                window.addEventListener('touchend', onUp, { passive:true });
+            }
+            setPos(0);
+        }
+
+        function rebuildActionButtons(o) {
+            var tr = t();
+            var wrap = document.getElementById('trBtns');
+            var warn = document.getElementById('trReceivedWarn');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            if (warn) { warn.hidden = true; warn.textContent = ''; }
+            if (readOnly) return;
+
+            var dir = String(o.direction || '').toUpperCase();
+            if (dir === 'SELL' && !o.receivedMoneyAt && o.status !== 'CANCELLED' && o.status !== 'COMPLETED') {
+                if (warn) {
+                    warn.hidden = false;
+                    warn.textContent = tr.tradeReceivedWarn ||
+                        'Slide the slider only after the payment has actually arrived in the bank account specified earlier.';
+                }
+                /* Slide only triggers existing confirmReceivedMoney → modal → doAction */
+                var slide = el('div', 'tr-slide');
+                slide.innerHTML =
+                    '<div class="tr-slide-fill"></div>' +
+                    '<div class="tr-slide-label">' + (tr.tradeSlideConfirm || tr.tradeReceivedBtn || 'Slide to confirm') + '</div>' +
+                    '<div class="tr-slide-handle" aria-hidden="true">›</div>';
+                wrap.appendChild(slide);
+                bindSlide(slide, function () { confirmReceivedMoney(); });
+            }
+
+            if (o.status !== 'CANCELLED' && o.status !== 'COMPLETED') {
+                var can = el('button', 'tr-btn tr-btn-danger', tr.cancelOrderBtn || 'Cancel Order');
+                can.type = 'button';
+                can.addEventListener('click', function () { confirmClientCancel(); });
+                wrap.appendChild(can);
+            }
+        }
+
+        function showModal(title, text, onOk) {
+            var modal = document.getElementById('trModal');
+            var mt = document.getElementById('trModalTitle');
+            var mx = document.getElementById('trModalText');
+            var ok = document.getElementById('trModalOk');
+            var cancel = document.getElementById('trModalCancel');
+            if (!modal) return;
+            var trL = t();
+            if (mt) mt.textContent = title;
+            if (mx) mx.textContent = text;
+            if (cancel) cancel.textContent = trL.nrConfirmCancel || 'Cancel';
+            if (ok) ok.textContent = trL.nrConfirmContinue || 'Confirm';
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            function close() {
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+                ok.onclick = null;
+                cancel.onclick = null;
+            }
+            cancel.onclick = function () { close(); };
+            ok.onclick = function () { close(); if (onOk) onOk(); };
+        }
+
+        function confirmClientCancel() {
+            var tr = t();
+            showModal(
+                tr.tradeCancelTitle || 'Cancel this order?',
+                tr.tradeCancelText || 'Are you sure you want to cancel this order? This cannot be undone.',
+                function () { doAction('cancel'); }
+            );
+        }
+
+        function confirmReceivedMoney() {
+            var tr = t();
+            showModal(
+                tr.tradeReceivedTitle || 'Confirm receipt?',
+                tr.tradeReceivedText || 'Check your bank account. Once confirmed, this action cannot be undone.',
+                function () { doAction('received_money'); }
+            );
+        }
+
+        function doAction(action) {
+            if (!orderRef || !orderRef.orderId || readOnly) return;
+            var session = ensureSession();
+            fetch(TRADE_API + '/api/trade/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session: session, orderId: orderRef.orderId, action: action })
+            })
+            .then(function (r) { return r.json().then(function (d) { return { status: r.status, data: d }; }); })
+            .then(function (res) {
+                if (res.status === 200 && res.data && res.data.order) {
+                    applyServerOrder(res.data.order);
+                } else {
+                    appendMsg('system', (res.data && res.data.error) || (t().tradeActionFailed || 'Action failed'));
+                }
+            })
+            .catch(function () { appendMsg('system', t().tradeNetworkError || 'Network error'); });
+        }
+
+        function applyServerOrder(so) {
+            if (!so || !orderRef) return;
+            var ALLOWED_TR_STATUS = {
+                CREATED: 1, PAYMENT_PENDING: 1, SCREENSHOT_UPLOADED: 1,
+                CONFIRMATION_SUBMITTED: 1, PROCESSING: 1, EXPIRED: 1,
+                CANCELLED: 1, CANCELED: 1, COMPLETED: 1, QUOTED: 1,
+                DONE: 1, SUCCESS: 1
+            };
+            if (so.status) {
+                var stIn = String(so.status).toUpperCase();
+                /* OPEN = trade-room channel state from server — never replace local order status */
+                if (stIn !== 'OPEN' && ALLOWED_TR_STATUS[stIn]) {
+                    orderRef.status = (stIn === 'CANCELED') ? 'CANCELLED' : (stIn === 'DONE' || stIn === 'SUCCESS' ? 'COMPLETED' : so.status);
+                    if (typeof updateOrderHistoryStatus === 'function') {
+                        var patch = { status: orderRef.status };
+                        if (so.cancelledBy) {
+                            patch.cancelledBy = so.cancelledBy;
+                            patch.cancelledAt = so.cancelledAt || Date.now();
+                            patch.cancelReason = so.cancelledBy === 'COUNTERPARTY'
+                                ? 'Cancelled by counterparty'
+                                : 'Cancelled by client';
+                        }
+                        if (so.receivedMoneyAt) {
+                            patch.receivedMoneyAt = so.receivedMoneyAt;
+                            orderRef.receivedMoneyAt = so.receivedMoneyAt;
+                        }
+                        updateOrderHistoryStatus(orderRef.orderId, patch);
+                    }
+                } else if (so.receivedMoneyAt) {
+                    orderRef.receivedMoneyAt = so.receivedMoneyAt;
+                }
+            }
+            if (orderRef.status === 'CANCELLED' || orderRef.status === 'COMPLETED') {
+                setReadOnly(true);
+            }
+            fillHeader(orderRef);
+            rebuildActionButtons(orderRef);
+            if (typeof renderActiveOrders === 'function') renderActiveOrders();
+            if (typeof renderOrderHistory === 'function') renderOrderHistory();
+        }
+
+        function openRoom(orderObj) {
+            orderRef = orderObj || null;
+            if (!orderRef || !orderRef.orderId) return;
+            lastSeq = 0;
+            seen = {};
+            var stU = String(orderRef.status || '').toUpperCase();
+            if (stU === 'CANCELED') stU = 'CANCELLED';
+            if (stU === 'DONE' || stU === 'SUCCESS') stU = 'COMPLETED';
+            readOnly = (stU === 'CANCELLED' || stU === 'EXPIRED' || stU === 'COMPLETED');
+            try {
+                orderRef.tradeRoom = true;
+                orderRef.flowStage = 'tradeRoom';
+                if (!orderRef.status || stU === 'OPEN') {
+                    orderRef.status = 'PROCESSING';
+                    stU = 'PROCESSING';
+                }
+                if (typeof updateOrderHistoryStatus === 'function') {
+                    var histPatch = {
+                        tradeRoom: true,
+                        flowStage: 'tradeRoom',
+                        status: orderRef.status
+                    };
+                    /* Only write payment fields when present — never null-wipe snapshot */
+                    if (orderRef.paymentMethod) histPatch.paymentMethod = orderRef.paymentMethod;
+                    if (orderRef.cardScheme) histPatch.cardScheme = orderRef.cardScheme;
+                    if (orderRef.bank) histPatch.bank = orderRef.bank;
+                    updateOrderHistoryStatus(orderRef.orderId, histPatch);
+                }
+            } catch (eOR) {}
+
+            var body = document.getElementById('trBody');
+            if (body) body.innerHTML = '';
+            /* Apply current site language to static Trade Room chrome */
+            var trL = t();
+            var inputEl = document.getElementById('trInput');
+            if (inputEl) inputEl.placeholder = trL.tradeMsgPlaceholder || 'Message…';
+            var modalCancel = document.getElementById('trModalCancel');
+            var modalOk = document.getElementById('trModalOk');
+            if (modalCancel) modalCancel.textContent = trL.nrConfirmCancel || trL.tipClose || 'Cancel';
+            if (modalOk) modalOk.textContent = trL.nrConfirmContinue || 'Confirm';
+            fillHeader(orderRef);
+            rebuildActionButtons(orderRef);
+            setReadOnly(readOnly);
+
+            var ov = document.getElementById('tradeRoomOverlay');
+            if (ov) {
+                ov.classList.add('open');
+                ov.setAttribute('aria-hidden', 'false');
+            }
+
+            /* Closed / expired orders: show local snapshot only — no open/poll */
+            if (readOnly) {
+                return;
+            }
+
+            var session = ensureSession();
+            fetch(TRADE_API + '/api/trade/open', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session: session,
+                    orderId: orderRef.orderId,
+                    meta: metaFromOrder(orderRef)
+                })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d && d.order) applyServerOrder(d.order);
+                startPoll();
+            })
+            .catch(function () {
+                appendMsg('system', t().tradeOpenFail || 'Could not reach trade server. You can still view order details.');
+                startPoll();
+            });
+        }
+
+        function startPoll() {
+            if (polling) return;
+            polling = true;
+            function tick() {
+                if (!orderRef || !orderRef.orderId) { polling = false; return; }
+                var session = ensureSession();
+                fetch(TRADE_API + '/api/trade/poll?orderId=' + encodeURIComponent(orderRef.orderId) +
+                    '&after=' + encodeURIComponent(String(lastSeq)), {
+                    method: 'GET',
+                    headers: { 'X-Support-Token': session, 'X-Session': session },
+                    cache: 'no-store'
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if (d && Array.isArray(d.messages)) d.messages.forEach(renderServerMsg);
+                    if (d && d.order) applyServerOrder(d.order);
+                })
+                .catch(function () {})
+                .then(function () {
+                    pollTimer = setTimeout(tick, 2500);
+                });
+            }
+            tick();
+        }
+
+        function stopPoll() {
+            polling = false;
+            if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+        }
+
+        function sendTrade(text) {
+            if (!orderRef || !orderRef.orderId || readOnly || !text) return;
+            var session = ensureSession();
+            var cid = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+            appendMsg('client', text);
+            fetch(TRADE_API + '/api/trade/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session: session,
+                    orderId: orderRef.orderId,
+                    text: text,
+                    cid: cid,
+                    meta: metaFromOrder(orderRef)
+                })
+            })
+            .then(function (r) { return r.json().then(function (d) { return { status: r.status, data: d }; }); })
+            .then(function (res) {
+                if (res.status === 200 && res.data && res.data.message) {
+                    renderServerMsg(res.data.message);
+                } else if (res.status === 422) {
+                    appendMsg('system', (res.data && res.data.message) || (t().tradeMsgBlocked || 'Message blocked for safety.'));
+                } else if (res.status === 409) {
+                    appendMsg('system', t().tradeOrderClosed || 'Order is closed.');
+                    setReadOnly(true);
+                } else {
+                    appendMsg('system', t().tradeMsgNotDelivered || 'Message not delivered. Try again.');
+                }
+            })
+            .catch(function () { appendMsg('system', t().tradeServerUnreachable || 'Trade server unreachable.'); });
+        }
+
+        window.openTradeRoom = function (orderObj) { openRoom(orderObj); };
+
+        window.openTradeRoomForOrderId = function (orderId) {
+            var o = resolveOrder(orderId);
+            /* Require full local snapshot — never open empty room with only orderId */
+            if (!o || !o.orderId || !o.asset) return;
+            openRoom(o);
+        };
+
+        /* Single source of truth for resume stage. isTradeRoomCase NEVER implies "open Trade Room now". */
+        function getOrderResumeStage(order) {
+            if (!order) return 'closed';
+            var st = String(order.status || '').toUpperCase();
+            if (st === 'CANCELED') st = 'CANCELLED';
+            if (st === 'OPEN') st = 'PROCESSING';
+            if (st === 'CANCELLED' || st === 'EXPIRED' || st === 'COMPLETED' || st === 'DONE' || st === 'SUCCESS') {
+                return 'closed';
+            }
+
+            /* Explicit local flowStage wins when set — tradeRoom only after real openRoom */
+            var fs = order.flowStage || '';
+            if (fs === 'tradeRoom' || order.tradeRoom === true) return 'tradeRoom';
+            if (fs === 'nr_processing') return 'nr_processing';
+            if (fs === 'confirmation') return 'confirmation';
+            if (fs === 'checkout') return 'checkout';
+
+            /* Infer from status (never use isTradeRoomCase alone) */
+            if (st === 'PROCESSING') {
+                if (typeof isP2pNrRestrictionCase === 'function' && isP2pNrRestrictionCase(order) && !order.tradeRoom) {
+                    return 'nr_processing';
+                }
+                return 'confirmation';
+            }
+            if (st === 'SCREENSHOT_UPLOADED' || st === 'CONFIRMATION_SUBMITTED') return 'confirmation';
+            if (st === 'CREATED' || st === 'PAYMENT_PENDING' || st === 'QUOTED') return 'checkout';
+            return 'checkout';
+        }
+        window.getOrderResumeStage = getOrderResumeStage;
+
+        /* continueTradeOrder is legacy alias — always go through state machine */
+        window.continueTradeOrder = function (orderId) {
+            if (typeof window.continueActiveOrder === 'function') {
+                window.continueActiveOrder(orderId);
+            }
+        };
+
+        /* Restore only P2P order selectors/state — payment UI and validation are untouched. */
+        function restoreP2PSelectorsFromOrder(o) {
+            if (!o) return;
+            try {
+                var dir = String(o.direction || '').toUpperCase();
+                if (dir === 'BUY' || dir === 'SELL') currentTab = dir === 'BUY' ? 'buy' : 'sell';
+                var sellTab = document.getElementById('tabSell');
+                var buyTab = document.getElementById('tabBuy');
+                if (sellTab) sellTab.classList.toggle('active', currentTab === 'sell');
+                if (buyTab) buyTab.classList.toggle('active', currentTab === 'buy');
+
+                var cryptoEl = document.getElementById('cryptoSelect');
+                if (cryptoEl && o.asset && Array.prototype.some.call(cryptoEl.options, function(opt){ return opt.value === o.asset; })) {
+                    cryptoEl.value = o.asset;
+                }
+                if (typeof updateNetworks === 'function') updateNetworks();
+
+                var netEl = document.getElementById('networkSelect');
+                if (netEl && o.network && Array.prototype.some.call(netEl.options, function(opt){ return opt.value === o.network; })) {
+                    netEl.value = o.network;
+                }
+                var fiatEl = document.getElementById('fiatSelect');
+                if (fiatEl && o.fiat && Array.prototype.some.call(fiatEl.options, function(opt){ return opt.value === o.fiat; })) {
+                    fiatEl.value = o.fiat;
+                }
+                if (typeof updateAmountCurrencyTicker === 'function') updateAmountCurrencyTicker();
+            } catch (eRestore) {}
+        }
+
+        /* ONE state machine for ALL Continue / Resume — never bypass via isTradeRoomCase */
+        window.continueActiveOrder = function (orderId) {
+            var o = resolveOrder(orderId);
+            if (!o || !o.orderId) return;
+            if (typeof currentCheckoutState !== 'undefined') {
+                currentCheckoutState = o;
+            } else {
+                window.currentCheckoutState = o;
+            }
+            restoreP2PSelectorsFromOrder(o);
+
+            var stage = getOrderResumeStage(o);
+
+            function hideAllFlowSections() {
+                try {
+                    var ids = ['marketSection', 'checkoutSection', 'paymentConfirmSection', 'activeOrdersSection', 'orderHistorySection'];
+                    for (var i = 0; i < ids.length; i++) {
+                        var el = document.getElementById(ids[i]);
+                        if (el) el.style.display = 'none';
+                    }
+                } catch (eH) {}
+            }
+
+            if (stage === 'closed') {
+                return;
+            }
+
+            if (stage === 'tradeRoom') {
+                openRoom(o);
+                return;
+            }
+
+            if (stage === 'nr_processing') {
+                hideAllFlowSections();
+                if (String(o.status || '').toUpperCase() === 'PROCESSING' &&
+                    typeof window.openP2pNrProcessingResume === 'function') {
+                    window.openP2pNrProcessingResume();
+                } else if (typeof openP2pNrSecondConfirm === 'function') {
+                    openP2pNrSecondConfirm();
+                }
+                return;
+            }
+
+            if (stage === 'confirmation') {
+                hideAllFlowSections();
+                var conf = document.getElementById('paymentConfirmSection');
+                if (conf) conf.style.display = 'flex';
+                try {
+                    if (typeof updatePaymentConfirmationUI === 'function') updatePaymentConfirmationUI();
+                } catch (eC) {}
+                try { if (typeof sfScrollToFlow === 'function') sfScrollToFlow(160); } catch (eS) {}
+                return;
+            }
+
+            /* checkout (default) */
+            hideAllFlowSections();
+            var co = document.getElementById('checkoutSection');
+            if (co) co.style.display = 'flex';
+            try {
+                if (typeof updateCheckoutUI === 'function') updateCheckoutUI();
+            } catch (eU) {}
+            try { if (typeof sfScrollToFlow === 'function') sfScrollToFlow(160); } catch (eS2) {}
+        };
+
+        window.closeTradeRoom = function () {
+            var ov = document.getElementById('tradeRoomOverlay');
+            if (ov) {
+                ov.classList.remove('open');
+                ov.setAttribute('aria-hidden', 'true');
+            }
+            stopPoll();
+            /* Closing the UI must NOT cancel or expire the order */
+            try {
+                if (orderRef && orderRef.orderId && typeof updateOrderHistoryStatus === 'function') {
+                    updateOrderHistoryStatus(orderRef.orderId, {
+                        tradeRoom: true,
+                        flowStage: 'tradeRoom',
+                        status: orderRef.status || 'PROCESSING'
+                    });
+                }
+            } catch (eClose) {}
+            orderRef = null;
+            try {
+                if (typeof renderActiveOrders === 'function') renderActiveOrders();
+                if (typeof updateNavActiveOrdersCount === 'function') updateNavActiveOrdersCount();
+                if (typeof renderOrderHistory === 'function') renderOrderHistory();
+            } catch (eR) {}
+        };
+
+        function bind() {
+            var closeBtn = document.getElementById('trCloseBtn');
+            if (closeBtn) closeBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                window.closeTradeRoom();
+            });
+            var ov = document.getElementById('tradeRoomOverlay');
+            if (ov) ov.addEventListener('click', function (e) {
+                if (e.target === ov) window.closeTradeRoom();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Escape' && e.keyCode !== 27) return;
+                var overlay = document.getElementById('tradeRoomOverlay');
+                if (!overlay || !overlay.classList.contains('open')) return;
+                e.preventDefault();
+                window.closeTradeRoom();
+            });
+            var form = document.getElementById('trForm');
+            if (form) form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var input = document.getElementById('trInput');
+                var text = input ? input.value.trim() : '';
+                if (!text) return;
+                if (input) input.value = '';
+                sendTrade(text.slice(0, 1000));
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bind);
+        } else {
+            bind();
+        }
+    })();
+    </script>
 
     <!-- Live Support Chat (Telegram) -->
     <script src="support-chat.js?v=20260930" defer></script>
