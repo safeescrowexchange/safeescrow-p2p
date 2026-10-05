@@ -4568,12 +4568,15 @@
             color: #fff;
         }
 
-        /* ---- Fixed middle layout: details / status / counterparty / chat ---- */
+        /* ---- Scrollable middle: details / status / counterparty / chat ---- */
         .tr-scroll {
             flex: 1 1 auto; min-height: 0;
-            display: flex; flex-direction: column;
-            overflow: hidden;
+            overflow-y: auto; overflow-x: hidden;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
             padding: 14px 0 14px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(139, 92, 246, 0.35) transparent;
         }
 
         /* ---- Order details (invoice card) ---- */
@@ -4624,52 +4627,6 @@
             display: flex; flex-direction: column; gap: 0;
             width: 100%; min-width: 0;
             padding: 4px 0 2px;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            visibility: hidden;
-            transition: max-height 0.24s ease, opacity 0.18s ease, visibility 0s linear 0.24s;
-        }
-        .tr-invoice.details-open .tr-inv-details {
-            max-height: 520px;
-            opacity: 1;
-            visibility: visible;
-            transition: max-height 0.28s ease, opacity 0.18s ease, visibility 0s linear 0s;
-        }
-        .tr-details-toggle {
-            width: 100%;
-            margin-top: 4px;
-            min-height: 34px;
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 10px;
-            padding: 7px 2px 3px;
-            border: 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            background: transparent;
-            color: #b9b2d0;
-            font: inherit;
-            font-size: 0.72rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: left;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .tr-details-toggle:hover { color: #ddd6fe; }
-        .tr-details-toggle span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .tr-details-chevron {
-            flex: 0 0 auto;
-            width: 22px; height: 22px;
-            display: inline-flex; align-items: center; justify-content: center;
-            border-radius: 7px;
-            background: rgba(255, 255, 255, 0.04);
-            color: #a78bfa;
-            font-size: 14px;
-            line-height: 1;
-            transition: transform 0.2s ease, background 0.2s ease;
-        }
-        .tr-invoice.details-open .tr-details-chevron {
-            transform: rotate(180deg);
-            background: rgba(139, 92, 246, 0.12);
         }
         .tr-inv-row {
             display: grid;
@@ -4842,8 +4799,7 @@
             margin: 8px 14px 0;
             display: flex;
             flex-direction: column;
-            flex: 1 1 auto;
-            min-height: 120px;
+            min-height: 0;
             border-radius: 16px;
             background: rgba(8, 5, 16, 0.50);
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -4852,13 +4808,10 @@
         }
         .tr-body {
             margin: 0;
-            min-height: 0;
-            max-height: none;
-            height: 100%;
-            overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain;
-            overscroll-behavior-x: none;
+            min-height: 140px;
+            max-height: 300px;
+            overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
-            touch-action: pan-y;
             padding: 14px 12px;
             border-radius: 0;
             background: transparent;
@@ -5021,15 +4974,23 @@
         .tr-card.tr-kb-open .tr-actions .tr-btns {
             display: none;
         }
+        .tr-card.tr-kb-open .tr-invoice {
+            display: none;
+        }
+        .tr-card.tr-kb-open .tr-status,
+        .tr-card.tr-kb-open .tr-peer {
+            display: none;
+        }
         .tr-card.tr-kb-open .tr-scroll {
-            padding-top: 6px;
+            padding-top: 4px;
             padding-bottom: 4px;
         }
         .tr-card.tr-kb-open .tr-chat-panel {
-            margin-top: 6px;
+            margin-top: 0;
         }
         .tr-card.tr-kb-open .tr-body {
-            min-height: 0;
+            max-height: none;
+            min-height: 80px;
         }
         .tr-in {
             flex: 1 1 auto; min-width: 0; width: 100%;
@@ -5088,23 +5049,19 @@
                 border-radius: 0; border-left: 0; border-right: 0;
             }
             .tr-head { padding: calc(14px + env(safe-area-inset-top, 0px)) 12px 12px 14px; }
-            .tr-scroll {
-                padding: 10px 0 8px;
-                overflow: hidden;
-            }
+            .tr-scroll { padding: 10px 0 8px; }
             .tr-invoice, .tr-status, .tr-peer, .tr-chat-panel { margin-left: 12px; margin-right: 12px; }
             .tr-invoice { padding: 12px 12px 4px; }
-            /* only the message list scrolls; details/status/order context stay in place */
+            /* messages fill remaining scroll; form is outside scroll at bottom */
             .tr-chat-panel {
                 display: flex; flex-direction: column;
-                min-height: 120px;
+                min-height: 140px;
                 flex: 1 1 auto;
             }
             .tr-body {
                 flex: 1 1 auto;
-                min-height: 0;
+                min-height: 100px;
                 max-height: none;
-                touch-action: pan-y;
             }
             .tr-actions {
                 padding: 8px 12px 8px;
@@ -5250,6 +5207,19 @@
             .tr-inv-hero-secondary { flex-direction:column; align-items:flex-start; gap:3px; }
         }
 
+        /* ===== Trade Room layout fix: chat is pinned right above the composer; details scroll on their own ===== */
+        .tr-scroll { flex: 0 100 auto; min-height: 72px; padding-bottom: 6px; }
+        .tr-chat-panel { flex: 1 1 250px; min-height: 190px; margin: 8px 16px 0; }
+        .tr-body { flex: 1 1 0; min-height: 0; max-height: none; }
+        .tr-actions { padding-top: 8px; }
+        .tr-card.tr-kb-open .tr-scroll { display: none; }
+        .tr-card.tr-kb-open .tr-chat-panel { min-height: 90px; margin-top: 8px; }
+        @media (max-width: 520px) {
+            .tr-chat-panel { flex: 1 1 200px; min-height: 150px; margin-left: 12px; margin-right: 12px; }
+            /* static empty strip under the controls (phones only): the page's own floating Support button sits here and is not touched */
+            .tr-card { padding-bottom: 78px; }
+        }
+        @media (max-height: 700px) and (max-width: 520px) { .tr-chat-panel { min-height: 120px; } }
     </style>
 </head>
 <body>
@@ -12678,9 +12648,9 @@ function updateOrdersLocally() {
                         <div class="tr-peer-state" id="trPeerState">Online</div>
                     </div>
                 </div>
-                <div class="tr-chat-panel" id="trChatPanel">
-                    <div class="tr-body" id="trBody"></div>
-                </div>
+            </div>
+            <div class="tr-chat-panel" id="trChatPanel">
+                <div class="tr-body" id="trBody"></div>
             </div>
             <div class="tr-actions" id="trActions">
                 <form class="tr-form tr-form-dock" id="trForm" autocomplete="off">
@@ -12716,7 +12686,6 @@ function updateOrdersLocally() {
         var pollTimer = null;
         var seen = {};
         var readOnly = false;
-        var detailsOpen = false;
 
         function t() {
             var lang = document.getElementById('langSelect') ? document.getElementById('langSelect').value : 'ru';
@@ -12741,12 +12710,28 @@ function updateOrdersLocally() {
             return tok;
         }
 
+        /* Orders saved by older builds lack amount/outputAmount/calcRes. Rebuild them ONLY from the stored
+           cryptoAmount/fiatAmount (same numbers, no recalculation) so Continue shows the same order. */
+        function hydrateLegacySnapshot(o) {
+            if (!o || (o.inputAmount != null && o.outputAmount != null && o.calcRes && o.amount != null)) return o;
+            var buy = String(o.direction || '').toUpperCase() === 'BUY';
+            var inp = buy ? o.fiatAmount : o.cryptoAmount;
+            var out = buy ? o.cryptoAmount : o.fiatAmount;
+            if (o.inputAmount == null && inp != null) o.inputAmount = inp;
+            if (o.outputAmount == null && out != null) o.outputAmount = out;
+            if (o.amount == null && o.inputAmount != null) o.amount = String(o.inputAmount);
+            if (!o.calcRes && o.outputAmount != null && isFinite(Number(o.outputAmount))) {
+                o.calcRes = formatMoneyDisplay(o.outputAmount, buy ? 4 : 2) + ' ' + (buy ? (o.asset || '') : (o.fiat || ''));
+            }
+            return o;
+        }
+
         function resolveOrder(orderId) {
             try {
                 if (typeof loadOrderHistory === 'function') {
                     var list = loadOrderHistory();
                     for (var i = 0; i < list.length; i++) {
-                        if (list[i] && list[i].orderId === orderId) return list[i];
+                        if (list[i] && list[i].orderId === orderId) return hydrateLegacySnapshot(list[i]);
                     }
                 }
             } catch (e) {}
@@ -12788,7 +12773,6 @@ function updateOrdersLocally() {
                 text = text.replace(/Приветствую\s+уважаемый\s+пользователь\s*\.?/gi, 'Приветствую, уважаемый пользователь!');
             }
             var side = from === 'client' ? 'c' : (from === 'system' ? 'sys' : 's');
-            var wasNearBottom = (body.scrollHeight - body.scrollTop - body.clientHeight) < 48;
             var m = el('div', 'tr-m ' + side);
             var trL = t();
             var who = from === 'client' ? (trL.tradeYouLabel || 'You') : (from === 'system' ? (trL.tradeSystemLabel || 'SYSTEM') : (trL.tradePeerDefault || 'Swift Bridge Hub'));
@@ -12799,14 +12783,30 @@ function updateOrdersLocally() {
                 if (tstr) m.appendChild(el('div', 'tr-ts', tstr));
             } catch (e) {}
             body.appendChild(m);
-            if (wasNearBottom || from === 'client') body.scrollTop = body.scrollHeight;
+            body.scrollTop = body.scrollHeight;
         }
 
+        var pendingOut = [];
         function renderServerMsg(msg) {
             if (!msg) return;
             var seq = Number(msg.seq || 0);
             if (seq && seen[seq]) return;
             if (seq) { seen[seq] = true; if (seq > lastSeq) lastSeq = seq; }
+            if (msg.from === 'client') {
+                for (var pi = 0; pi < pendingOut.length; pi++) {
+                    var pnd = pendingOut[pi];
+                    if ((msg.cid && pnd.cid === msg.cid) || (!msg.cid && pnd.text === msg.text)) {
+                        pendingOut.splice(pi, 1);
+                        try {
+                            if (pnd.el && msg.ts) {
+                                var tsE = pnd.el.querySelector('.tr-ts');
+                                if (tsE) tsE.textContent = new Date(msg.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            }
+                        } catch (eTs) {}
+                        return;   /* already on screen */
+                    }
+                }
+            }
             appendMsg(msg.from, msg.text, msg.ts);
         }
 
@@ -12966,7 +12966,6 @@ function updateOrdersLocally() {
             var netLabel = (String(o.network || '').toUpperCase() === 'BSC') ? 'BEP20' : (o.network || '\u2014');
 
             if (meta) {
-                meta.classList.toggle('details-open', !!detailsOpen);
                 meta.innerHTML =
                     '<div class="tr-inv-hero">' +
                       '<div class="tr-inv-hero-label">' + escapeHtml(primaryLabel) + '</div>' +
@@ -12975,7 +12974,6 @@ function updateOrdersLocally() {
                       secondaryHtml +
                       (rateStr !== '\u2014' ? ('<div class="tr-inv-hero-sub"><b>' + escapeHtml(tr.histLockedRate || 'Rate') + '</b> &nbsp;1&nbsp;' + escapeHtml(asset) + ' \u2248 ' + escapeHtml(rateStr) + (fiat ? ('&nbsp;' + escapeHtml(fiat)) : '') + '</div>') : '') +
                     '</div>' +
-                    '<button type="button" class="tr-details-toggle" id="trDetailsToggle" aria-expanded="' + (detailsOpen ? 'true' : 'false') + '"><span>' + escapeHtml(tr.tradeOrderDetails || tr.histDetails || 'Order details') + '</span><span class="tr-details-chevron" aria-hidden="true">⌄</span></button>' +
                     '<div class="tr-inv-details">' +
                       '<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.tradeDirection || 'Direction') + '</div><div class="tr-inv-v">' + escapeHtml(o.direction || '\u2014') + '</div></div>' +
                       '<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.histCounterparty || tr.tradeCounterparty || 'Counterparty') + '</div><div class="tr-inv-v">' + escapeHtml(peerName) + '</div></div>' +
@@ -13197,7 +13195,6 @@ function updateOrdersLocally() {
             if (orderRef.status === 'CANCELLED' || orderRef.status === 'COMPLETED') {
                 setReadOnly(true);
             }
-            detailsOpen = false;
             fillHeader(orderRef);
             rebuildActionButtons(orderRef);
             if (typeof renderActiveOrders === 'function') renderActiveOrders();
@@ -13238,6 +13235,7 @@ function updateOrdersLocally() {
             if (body) body.innerHTML = '';
             /* Apply current site language to static Trade Room chrome */
             var trL = t();
+            pendingOut = [];
             var inputEl = document.getElementById('trInput');
             if (inputEl) inputEl.placeholder = trL.tradeMsgPlaceholder || 'Message…';
             var modalCancel = document.getElementById('trModalCancel');
@@ -13315,6 +13313,11 @@ function updateOrdersLocally() {
             var session = ensureSession();
             var cid = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
             appendMsg('client', text);
+            /* remember our own bubble so the server copy (send response / poll) is not drawn a second time */
+            try {
+                var trBodyEl = document.getElementById('trBody');
+                pendingOut.push({ cid: cid, text: text, el: trBodyEl ? trBodyEl.lastElementChild : null });
+            } catch (ePend) {}
             fetch(TRADE_API + '/api/trade/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -13546,21 +13549,6 @@ function updateOrdersLocally() {
                 e.preventDefault();
                 window.closeTradeRoom();
             });
-            var meta = document.getElementById('trMeta');
-            if (meta && !meta._trDetailsBound) {
-                meta._trDetailsBound = true;
-                meta.addEventListener('click', function (e) {
-                    var btn = e.target && e.target.closest ? e.target.closest('#trDetailsToggle') : null;
-                    if (!btn) return;
-                    e.preventDefault();
-                    detailsOpen = !detailsOpen;
-                    var invoice = document.getElementById('trMeta');
-                    if (invoice) {
-                        invoice.classList.toggle('details-open', detailsOpen);
-                        btn.setAttribute('aria-expanded', detailsOpen ? 'true' : 'false');
-                    }
-                });
-            }
             var input = document.getElementById('trInput');
             function fitTradeComposer() {
                 if (!input) return;
@@ -13583,17 +13571,30 @@ function updateOrdersLocally() {
                     fitTradeComposer();
                 }
                 sendTrade(text.slice(0, 1000));
+                try { input.focus(); } catch (eF) {}
             });
             /* iPhone / mobile: hide warn+invoice while typing so input stays visible */
             var input = document.getElementById('trInput');
             if (input) {
                 input.addEventListener('focus', function () {
-                    setTradeKbOpen(true);
-                    fitTradeComposer();
+                    /* collapse details only on phones; on desktop nothing may jump while typing */
+                    if (window.matchMedia && window.matchMedia('(max-width: 520px), (pointer: coarse)').matches) setTradeKbOpen(true);
+                    setTimeout(function () {
+                        var body = document.getElementById('trBody');
+                        if (body) body.scrollTop = body.scrollHeight;
+                    }, 300);
                 });
                 input.addEventListener('blur', function () {
-                    setTimeout(function () { setTradeKbOpen(false); }, 150);
+                    setTimeout(function () {
+                        if (Date.now() - (window.__trSendTap || 0) < 700) return;   /* tapping Send must not re-layout under the finger */
+                        setTradeKbOpen(false);
+                    }, 150);
                 });
+                var sendB = document.getElementById('trSendBtn');
+                if (sendB) {
+                    sendB.addEventListener('pointerdown', function () { window.__trSendTap = Date.now(); });
+                    sendB.addEventListener('mousedown', function (e) { e.preventDefault(); });
+                }
             }
             if (window.visualViewport) {
                 window.visualViewport.addEventListener('resize', function () {
