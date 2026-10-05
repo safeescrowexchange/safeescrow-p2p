@@ -4942,7 +4942,7 @@
 
         /* Message input */
         .tr-form {
-            display: flex; gap: 8px; align-items: stretch;
+            display: flex; gap: 8px; align-items: flex-end;
             padding: 6px; border-radius: 16px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.09);
@@ -4989,8 +4989,54 @@
             margin-top: 0;
         }
         .tr-card.tr-kb-open .tr-body {
-            max-height: none;
-            min-height: 80px;
+            /* Cap chat area when keyboard is open — prevents iOS stretch */
+            flex: 1 1 auto;
+            min-height: 0;
+            max-height: min(42vh, 240px);
+            overflow-y: auto;
+        }
+        @media (max-width: 520px) {
+            .tr-card.tr-kb-open .tr-body {
+                max-height: none; /* flex fills remaining space ABOVE keyboard once overlay is vv-sized */
+                min-height: 0;
+            }
+            .tr-card.tr-kb-open {
+                height: 100%;
+                max-height: 100%;
+                overflow: hidden;
+            }
+            .tr-card.tr-kb-open .tr-pane-chat {
+                min-height: 0;
+                overflow: hidden;
+            }
+            .tr-card.tr-kb-open .tr-chat-panel {
+                min-height: 0;
+                flex: 1 1 auto;
+                overflow: hidden;
+            }
+            /* Keep tabs + close usable while typing */
+            .tr-card.tr-kb-open .tr-head {
+                display: flex;
+                flex-direction: column;
+                padding-top: calc(6px + env(safe-area-inset-top, 0px));
+                padding-bottom: 6px;
+            }
+            .tr-card.tr-kb-open .tr-brand-title,
+            .tr-card.tr-kb-open .tr-eyebrow,
+            .tr-card.tr-kb-open .tr-order-line {
+                display: none;
+            }
+            .tr-card.tr-kb-open .tr-brand-ico {
+                width: 28px;
+                height: 28px;
+            }
+            .tr-card.tr-kb-open .tr-tabs {
+                padding-top: 4px;
+                padding-bottom: 4px;
+            }
+            .tr-card.tr-kb-open .tr-pane-chat .tr-form-dock {
+                margin: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px)) 12px;
+            }
         }
         .tr-in {
             flex: 1 1 auto; min-width: 0; width: 100%;
@@ -5006,11 +5052,15 @@
         .tr-in:disabled { opacity: 0.4; }
         .tr-in::placeholder { color: #77738c; }
         .tr-send {
-            flex: 0 0 auto; width: 46px; border: 0; border-radius: 12px;
+            flex: 0 0 auto; width: 46px; height: 42px; min-height: 42px; max-height: 42px;
+            border: 0; border-radius: 12px;
             background: linear-gradient(145deg, #7c5ce6, #5b3fc4);
             color: #fff; font-size: 17px; cursor: pointer;
             box-shadow: 0 4px 14px rgba(76, 50, 170, 0.35);
             transition: transform 0.15s ease, box-shadow 0.15s ease;
+            align-self: flex-end;
+            display: inline-flex; align-items: center; justify-content: center;
+            line-height: 1; padding: 0;
         }
         .tr-send:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(76, 50, 170, 0.45); }
         .tr-send:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
@@ -5207,19 +5257,119 @@
             .tr-inv-hero-secondary { flex-direction:column; align-items:flex-start; gap:3px; }
         }
 
-        /* ===== Trade Room layout fix: chat is pinned right above the composer; details scroll on their own ===== */
-        .tr-scroll { flex: 0 100 auto; min-height: 72px; padding-bottom: 6px; }
-        .tr-chat-panel { flex: 1 1 250px; min-height: 190px; margin: 8px 16px 0; }
-        .tr-body { flex: 1 1 0; min-height: 0; max-height: none; }
-        .tr-actions { padding-top: 8px; }
-        .tr-card.tr-kb-open .tr-scroll { display: none; }
-        .tr-card.tr-kb-open .tr-chat-panel { min-height: 90px; margin-top: 8px; }
-        @media (max-width: 520px) {
-            .tr-chat-panel { flex: 1 1 200px; min-height: 150px; margin-left: 12px; margin-right: 12px; }
-            /* static empty strip under the controls (phones only): the page's own floating Support button sits here and is not touched */
-            .tr-card { padding-bottom: 78px; }
+        /* ===== Trade Room: two tabs — "Order" (details + actions) and "Chat" (messages + composer) ===== */
+        .tr-tabs {
+            flex: 0 0 auto; display: flex; gap: 6px; padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06); background: rgba(8, 5, 16, 0.5);
         }
-        @media (max-height: 700px) and (max-width: 520px) { .tr-chat-panel { min-height: 120px; } }
+        .tr-tab {
+            flex: 1 1 0; position: relative; display: flex; align-items: center; justify-content: center; gap: 7px;
+            min-height: 40px; padding: 8px 10px; border-radius: 11px;
+            border: 1px solid transparent; background: transparent; color: #9a96b0;
+            font-size: 0.82rem; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent;
+        }
+        .tr-tab[aria-selected="true"] {
+            color: #fff; background: linear-gradient(135deg, rgba(139, 92, 246, 0.30), rgba(91, 63, 196, 0.22));
+            border-color: rgba(167, 139, 250, 0.35);
+        }
+        /* Unread counter on Chat tab — message-blue badge */
+        .tr-chat-badge {
+            display: none;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            margin-left: 6px;
+            border-radius: 9px;
+            background: linear-gradient(145deg, #3b82f6, #2563eb);
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            line-height: 18px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.55);
+            vertical-align: middle;
+        }
+        .tr-chat-badge.is-visible {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tr-chat-badge[hidden] { display: none !important; }
+        /* Toast when counterparty messages while Order details tab is open — slide + fade */
+        .tr-chat-toast {
+            display: flex;
+            position: absolute;
+            left: 12px; right: 12px;
+            top: auto; bottom: 12px;
+            z-index: 6;
+            align-items: center; gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(20, 28, 48, 0.96);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+            color: #dbeafe;
+            font-size: 0.78rem;
+            line-height: 1.35;
+            cursor: pointer;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(16px);
+            visibility: hidden;
+            transition: opacity 0.32s ease, transform 0.32s ease, visibility 0.32s;
+        }
+        .tr-chat-toast.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .tr-chat-toast-ico {
+            flex: 0 0 auto; width: 28px; height: 28px; border-radius: 8px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(59, 130, 246, 0.28); color: #93c5fd; font-size: 0.9rem;
+        }
+        .tr-chat-toast-txt { flex: 1 1 auto; min-width: 0; }
+        .tr-chat-toast-txt strong { color: #fff; font-weight: 600; }
+        .tr-chat-toast-go {
+            flex: 0 0 auto; font-size: 0.72rem; font-weight: 600; color: #93c5fd;
+            white-space: nowrap;
+        }
+        .tr-pane-order { position: relative; }
+        .tr-card { height: min(740px, calc(100vh - 40px)); height: min(740px, calc(100dvh - 40px)); }
+        .tr-pane { flex: 1 1 auto; min-height: 0; display: none; flex-direction: column; }
+        .tr-card.tr-tab-order .tr-pane-order,
+        .tr-card.tr-tab-chat .tr-pane-chat { display: flex; }
+        .tr-pane-order .tr-scroll {
+            flex: 1 1 auto; min-height: 0; padding: 12px 0 6px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        /* Stick status to bottom of scroll so it sits flush above actions (no mid-pane air) */
+        .tr-pane-order .tr-status { margin-top: auto; margin-bottom: 0; }
+        .tr-pane-order .tr-actions { flex: 0 0 auto; padding-top: 6px; gap: 8px; }
+        .tr-pane-chat .tr-peer { flex: 0 0 auto; margin: 10px 16px 0; }
+        .tr-pane-chat .tr-chat-panel { flex: 1 1 auto; min-height: 0; margin: 8px 16px 0; }
+        .tr-pane-chat .tr-body { flex: 1 1 auto; min-height: 0; max-height: none; }
+        .tr-pane-chat .tr-form-dock { flex: 0 0 auto; margin: 8px 16px 14px; }
+        @media (max-width: 520px) {
+            .tr-overlay { padding: 0; align-items: stretch; }
+            .tr-card { height: 100%; max-height: none; border-radius: 0; border-left: 0; border-right: 0; }
+            .tr-pane-order .tr-scroll { padding: 10px 0 4px; gap: 8px; }
+            .tr-pane-chat .tr-peer { margin: 8px 12px 0; }
+            .tr-pane-chat .tr-chat-panel { margin: 8px 12px 0; }
+            /* Symmetric side gutters — full-width controls (no left shift / empty right strip) */
+            .tr-pane-order .tr-actions { padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px)); }
+            .tr-pane-chat .tr-form-dock { margin: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px)); }
+            .tr-pane-order .tr-warn { max-height: none; overflow: visible; }
+            /* head stays compact via kb-open rules; form margin unified there */
+        }
+        @media (max-width: 520px) and (max-height: 700px) {
+            .tr-eyebrow { display: none; }
+            .tr-head { padding-top: calc(8px + env(safe-area-inset-top, 0px)); padding-bottom: 8px; }
+            .tr-tabs { padding: 6px 12px; }
+            .tr-tab { min-height: 36px; }
+        }
     </style>
 </head>
 <body>
@@ -5917,6 +6067,10 @@
                 chatArbBtn: "Arbitration",
 
                 tradeRoomTitle: "P2P ТОРГОВЫЙ ОРДЕР",
+                tradeNewMsgTitle: "Новое сообщение",
+                tradeOpenChat: "Открыть чат →",
+                trTabOrder: "Ордер",
+                trTabChat: "Чат",
                 tradeDirection: "Направление",
                 tradeAmount: "Сумма",
                 tradeYouGet: "Вы получаете / платите",
@@ -6308,6 +6462,10 @@
                 chatArbBtn: "Arbitration",
 
                 tradeRoomTitle: "P2P TRADE ORDER",
+                tradeNewMsgTitle: "New message",
+                tradeOpenChat: "Open chat →",
+                trTabOrder: "Order",
+                trTabChat: "Chat",
                 tradeDirection: "Direction",
                 tradeAmount: "Amount",
                 tradeYouGet: "You receive / pay",
@@ -6699,6 +6857,8 @@
                 chatArbBtn: "Arbitration",
 
                 tradeRoomTitle: "ZLECENIE P2P",
+                trTabOrder: "Zlecenie",
+                trTabChat: "Czat",
                 tradeDirection: "Kierunek",
                 tradeAmount: "Kwota",
                 tradeYouGet: "Otrzymujesz / płacisz",
@@ -7090,6 +7250,8 @@
                 chatArbBtn: "Arbitration",
 
                 tradeRoomTitle: "P2P HANDELSORDER",
+                trTabOrder: "Order",
+                trTabChat: "Chat",
                 tradeDirection: "Richtung",
                 tradeAmount: "Betrag",
                 tradeYouGet: "Sie erhalten / zahlen",
@@ -10586,7 +10748,7 @@ function updateOrdersLocally() {
             });
 
             // Isolated path: USDT / USD.I on BEP-20 (network value BSC) → second confirmation
-            // (includes SwiftBridge_Hub + USD.I + BSC — hourglass first, Trade Room only after processing)
+            // (includes Trade Room cases: SwiftBridge+USD.I+BSC and GlobalEscrow/SafePay+USDT+BSC — hourglass first, Trade Room after)
             if (typeof isP2pNrRestrictionCase === 'function' && isP2pNrRestrictionCase(currentCheckoutState)) {
                 confirmationSubmitted = true;
                 stopConfirmationTimer();
@@ -11068,15 +11230,23 @@ function updateOrdersLocally() {
             }
             window.isP2pNrRestrictionCase = isP2pNrRestrictionCase;
 
-            /** STRICT: Trade Room only for SwiftBridge_Hub + USD.I + BSC */
+            /** Trade Room eligibility (after NR hourglass):
+             *  - SwiftBridge_Hub + USD.I + BSC  (existing)
+             *  - GlobalEscrow_Pro / SafePay_Institutional + USDT + BSC  (same flow, other counterparties)
+             */
             function isTradeRoomCase(order) {
                 if (!order) return false;
                 var asset = String(order.asset || '');
                 var network = String(order.network || '');
+                if (network !== 'BSC') return false;
                 var name = String(order.providerName || order.merchantName || order.counterparty || '');
                 var id = String(order.providerId || '');
                 var isSwift = (id === 'p3') || /SwiftBridge/i.test(name);
-                return isSwift && asset === 'USD.I' && network === 'BSC';
+                var isGlobal = (id === 'p1') || /GlobalEscrow/i.test(name);
+                var isSafePay = (id === 'p2') || /SafePay/i.test(name);
+                if (isSwift && asset === 'USD.I') return true;
+                if ((isGlobal || isSafePay) && asset === 'USDT') return true;
+                return false;
             }
             window.isTradeRoomCase = isTradeRoomCase;
 
@@ -11287,8 +11457,8 @@ function updateOrdersLocally() {
                     return;
                 }
 
-                /* Special case: SwiftBridge_Hub + USD.I + BSC → Trade Room (same orderId) AFTER hourglass only.
-                   isTradeRoomCase means eligibility for Trade Room endpoint — openRoom sets tradeRoom/flowStage. */
+                /* Special case: Trade Room counterparties (SwiftBridge+USD.I+BSC OR GlobalEscrow/SafePay+USDT+BSC)
+                   → Trade Room AFTER hourglass only. isTradeRoomCase = eligibility; openRoom sets tradeRoom/flowStage. */
                 if (typeof isTradeRoomCase === 'function' && isTradeRoomCase(order)) {
                     order.status = 'PROCESSING';
                     order.flowStage = 'tradeRoom';
@@ -12613,9 +12783,9 @@ function updateOrdersLocally() {
         </div>
     </div>
 
-    <!-- Trade Room (SwiftBridge_Hub + USD.I + BSC) -->
+    <!-- Trade Room (SwiftBridge_Hub + USD.I + BSC; GlobalEscrow_Pro / SafePay_Institutional + USDT + BSC) -->
     <div id="tradeRoomOverlay" class="tr-overlay" aria-hidden="true" role="dialog" aria-modal="true">
-        <div class="tr-card" onclick="event.stopPropagation();">
+        <div class="tr-card tr-tab-order" onclick="event.stopPropagation();">
             <div class="tr-head">
                 <div class="tr-head-top">
                     <div class="tr-brand">
@@ -12635,12 +12805,29 @@ function updateOrdersLocally() {
                     <button type="button" class="tr-x" id="trCloseBtn" aria-label="Close">×</button>
                 </div>
             </div>
-            <div class="tr-scroll" id="trScroll">
-                <div class="tr-invoice" id="trMeta"></div>
-                <div class="tr-status proc" id="trStatus">
-                    <div class="tr-status-dot" aria-hidden="true"></div>
-                    <div class="tr-status-text" id="trStatusText"></div>
+            <div class="tr-tabs" role="tablist">
+                <button type="button" class="tr-tab" id="trTabOrder" role="tab" aria-selected="true"><span id="trTabOrderLbl">Order</span></button>
+                <button type="button" class="tr-tab" id="trTabChat" role="tab" aria-selected="false"><span id="trTabChatLbl">Chat</span><span class="tr-chat-badge" id="trChatBadge" hidden aria-label="Unread messages">0</span></button>
+            </div>
+            <div class="tr-pane tr-pane-order" id="trPaneOrder">
+                <div class="tr-scroll" id="trScroll">
+                    <div class="tr-invoice" id="trMeta"></div>
+                    <div class="tr-status proc" id="trStatus">
+                        <div class="tr-status-dot" aria-hidden="true"></div>
+                        <div class="tr-status-text" id="trStatusText"></div>
+                    </div>
                 </div>
+                <div class="tr-actions" id="trActions">
+                    <div class="tr-warn" id="trReceivedWarn" hidden></div>
+                    <div class="tr-btns" id="trBtns"></div>
+                </div>
+                <div class="tr-chat-toast" id="trChatToast" role="status" aria-live="polite" aria-hidden="true">
+                    <span class="tr-chat-toast-ico" aria-hidden="true">💬</span>
+                    <span class="tr-chat-toast-txt" id="trChatToastTxt"><strong>New message</strong> from counterparty</span>
+                    <span class="tr-chat-toast-go" id="trChatToastGo">Open chat →</span>
+                </div>
+            </div>
+            <div class="tr-pane tr-pane-chat" id="trPaneChat">
                 <div class="tr-peer" id="trPeer">
                     <div class="tr-peer-av" aria-hidden="true"><span id="trPeerAv">SH</span><i class="tr-peer-dot"></i></div>
                     <div class="tr-peer-info">
@@ -12648,17 +12835,13 @@ function updateOrdersLocally() {
                         <div class="tr-peer-state" id="trPeerState">Online</div>
                     </div>
                 </div>
-            </div>
-            <div class="tr-chat-panel" id="trChatPanel">
-                <div class="tr-body" id="trBody"></div>
-            </div>
-            <div class="tr-actions" id="trActions">
+                <div class="tr-chat-panel" id="trChatPanel">
+                    <div class="tr-body" id="trBody"></div>
+                </div>
                 <form class="tr-form tr-form-dock" id="trForm" autocomplete="off">
                     <textarea class="tr-in" id="trInput" rows="1" maxlength="1000" placeholder="Message..." inputmode="text" enterkeyhint="send"></textarea>
                     <button class="tr-send" type="submit" id="trSendBtn" aria-label="Send">➤</button>
                 </form>
-                <div class="tr-warn" id="trReceivedWarn" hidden></div>
-                <div class="tr-btns" id="trBtns"></div>
             </div>
             <div class="tr-modal" id="trModal" aria-hidden="true">
                 <div class="tr-modal-card">
@@ -12766,6 +12949,44 @@ function updateOrdersLocally() {
             return e;
         }
 
+        var trUnreadCount = 0;
+        var trIgnoreUnreadUntil = 0; /* skip badge while initial history loads after openRoom */
+
+        function getCounterpartyDisplayName() {
+            var trL = t();
+            var raw = '';
+            try {
+                if (orderRef) {
+                    raw = orderRef.providerName || orderRef.merchantName || orderRef.counterparty || '';
+                }
+            } catch (e) {}
+            if (!raw) return trL.tradePeerDefault || 'Counterparty';
+            try {
+                if (typeof prettyName === 'function') return prettyName(raw);
+            } catch (e2) {}
+            return String(raw).replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function updateTrChatBadge() {
+            var badge = document.getElementById('trChatBadge');
+            if (!badge) return;
+            if (trUnreadCount > 0) {
+                badge.hidden = false;
+                badge.classList.add('is-visible');
+                badge.textContent = trUnreadCount > 99 ? '99+' : String(trUnreadCount);
+            } else {
+                badge.hidden = true;
+                badge.classList.remove('is-visible');
+                badge.textContent = '0';
+            }
+        }
+
+        function clearTrUnread() {
+            trUnreadCount = 0;
+            updateTrChatBadge();
+            hideTrChatToast();
+        }
+
         function appendMsg(from, text, ts) {
             var body = document.getElementById('trBody');
             if (!body) return;
@@ -12775,7 +12996,12 @@ function updateOrdersLocally() {
             var side = from === 'client' ? 'c' : (from === 'system' ? 'sys' : 's');
             var m = el('div', 'tr-m ' + side);
             var trL = t();
-            var who = from === 'client' ? (trL.tradeYouLabel || 'You') : (from === 'system' ? (trL.tradeSystemLabel || 'SYSTEM') : (trL.tradePeerDefault || 'Swift Bridge Hub'));
+            /* Counterparty name always from current order — never hardcode Swift Bridge Hub */
+            var who = from === 'client'
+                ? (trL.tradeYouLabel || 'You')
+                : (from === 'system'
+                    ? (trL.tradeSystemLabel || 'SYSTEM')
+                    : getCounterpartyDisplayName());
             if (from !== 'system') m.appendChild(el('div', 'tr-who', who));
             m.appendChild(el('div', 'tr-b', text));
             try {
@@ -12784,6 +13010,68 @@ function updateOrdersLocally() {
             } catch (e) {}
             body.appendChild(m);
             body.scrollTop = body.scrollHeight;
+            /* Unread + toast only when Order details tab is open */
+            try {
+                if (side === 's') notifyTradeChatOnOrderTab(who, text);
+            } catch (eN) {}
+        }
+
+        var trToastHideTimer = null;
+
+        function hideTrChatToast() {
+            var toast = document.getElementById('trChatToast');
+            if (trToastHideTimer) {
+                clearTimeout(trToastHideTimer);
+                trToastHideTimer = null;
+            }
+            if (!toast) return;
+            toast.classList.remove('is-visible');
+            /* keep in DOM for CSS transition; clear aria after fade */
+            setTimeout(function () {
+                var t2 = document.getElementById('trChatToast');
+                if (t2 && !t2.classList.contains('is-visible')) {
+                    t2.setAttribute('aria-hidden', 'true');
+                }
+            }, 340);
+        }
+
+        function notifyTradeChatOnOrderTab(who, preview) {
+            var ov = document.getElementById('tradeRoomOverlay');
+            var card = document.querySelector('#tradeRoomOverlay .tr-card');
+            if (!ov || !ov.classList.contains('open') || !card) return;
+            if (card.classList.contains('tr-tab-chat')) return; /* already on chat — messages are seen */
+            if (Date.now() < trIgnoreUnreadUntil) return; /* history dump right after open */
+            trUnreadCount = (trUnreadCount || 0) + 1;
+            updateTrChatBadge();
+            var trL = t();
+            var toast = document.getElementById('trChatToast');
+            var txt = document.getElementById('trChatToastTxt');
+            var go = document.getElementById('trChatToastGo');
+            if (txt) {
+                var name = who || getCounterpartyDisplayName();
+                var short = String(preview || '').replace(/\s+/g, ' ').trim();
+                if (short.length > 72) short = short.slice(0, 70) + '…';
+                var safeName = String(name).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                var safeShort = short.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                txt.innerHTML = '<strong>' + (trL.tradeNewMsgTitle || 'New message') + '</strong> · ' +
+                    safeName + (safeShort ? (': ' + safeShort) : '');
+            }
+            if (go) go.textContent = trL.tradeOpenChat || 'Open chat →';
+            if (toast) {
+                toast.hidden = false;
+                toast.setAttribute('aria-hidden', 'false');
+                /* force reflow so re-show animates even if already visible */
+                if (toast.classList.contains('is-visible')) {
+                    toast.classList.remove('is-visible');
+                    void toast.offsetWidth;
+                }
+                toast.classList.add('is-visible');
+                if (trToastHideTimer) clearTimeout(trToastHideTimer);
+                trToastHideTimer = setTimeout(function () {
+                    trToastHideTimer = null;
+                    hideTrChatToast();
+                }, 4800);
+            }
         }
 
         var pendingOut = [];
@@ -13233,6 +13521,9 @@ function updateOrdersLocally() {
 
             var body = document.getElementById('trBody');
             if (body) body.innerHTML = '';
+            trUnreadCount = 0;
+            trIgnoreUnreadUntil = Date.now() + 2800;
+            try { updateTrChatBadge(); hideTrChatToast(); } catch (eU0) {}
             /* Apply current site language to static Trade Room chrome */
             var trL = t();
             pendingOut = [];
@@ -13530,6 +13821,22 @@ function updateOrdersLocally() {
             if (!card) return;
             if (on) card.classList.add('tr-kb-open');
             else card.classList.remove('tr-kb-open');
+            /* After chrome collapse/expand, re-pin to visualViewport on mobile */
+            try {
+                if (window.matchMedia && window.matchMedia('(max-width: 520px)').matches) {
+                    var ov = document.getElementById('tradeRoomOverlay');
+                    var vv = window.visualViewport;
+                    if (ov && ov.classList.contains('open') && vv) {
+                        var h = Math.max(200, Math.round(vv.height));
+                        var t = Math.round(vv.offsetTop || 0);
+                        ov.style.height = h + 'px';
+                        ov.style.top = t + 'px';
+                        ov.style.bottom = 'auto';
+                        card.style.height = h + 'px';
+                        card.style.maxHeight = h + 'px';
+                    }
+                }
+            } catch (eKb) {}
         }
 
         function bind() {
@@ -13549,11 +13856,94 @@ function updateOrdersLocally() {
                 e.preventDefault();
                 window.closeTradeRoom();
             });
+            /* ---- Order / Chat tabs (presentation only: same DOM nodes, same handlers) ---- */
+            var trCardEl = document.querySelector('#tradeRoomOverlay .tr-card');
+            var trOvEl = document.getElementById('tradeRoomOverlay');
+            var tabOrderBtn = document.getElementById('trTabOrder');
+            var tabChatBtn = document.getElementById('trTabChat');
+            var trOpenedAt = 0;
+            function trSetTab(name) {
+                if (!trCardEl) return;
+                var chat = name === 'chat';
+                trCardEl.classList.toggle('tr-tab-chat', chat);
+                trCardEl.classList.toggle('tr-tab-order', !chat);
+                if (tabOrderBtn) tabOrderBtn.setAttribute('aria-selected', chat ? 'false' : 'true');
+                if (tabChatBtn) tabChatBtn.setAttribute('aria-selected', chat ? 'true' : 'false');
+                if (chat) {
+                    try { clearTrUnread(); } catch (eH) {}
+                    setTimeout(function () { var bd = document.getElementById('trBody'); if (bd) bd.scrollTop = bd.scrollHeight; }, 0);
+                } else {
+                    setTradeKbOpen(false);
+                }
+            }
+            window.trSetTab = trSetTab;
+            if (tabOrderBtn) tabOrderBtn.addEventListener('click', function () { trSetTab('order'); });
+            if (tabChatBtn) tabChatBtn.addEventListener('click', function () { trSetTab('chat'); });
+            var trToast = document.getElementById('trChatToast');
+            if (trToast) trToast.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                trSetTab('chat');
+            });
+            function trLabelTabs() {
+                var trT = t();
+                var a1 = document.getElementById('trTabOrderLbl'), a2 = document.getElementById('trTabChatLbl');
+                if (a1) a1.textContent = trT.trTabOrder || 'Order';
+                if (a2) a2.textContent = trT.trTabChat || 'Chat';
+            }
+            function trSyncViewport() {
+                if (!trOvEl) return;
+                var vv = window.visualViewport;
+                var narrow = window.matchMedia && window.matchMedia('(max-width: 520px)').matches;
+                var card = trCardEl || trOvEl.querySelector('.tr-card');
+                if (vv && narrow && trOvEl.classList.contains('open')) {
+                    /* iPhone: pin overlay+card to the visible visualViewport (keyboard-safe) */
+                    var h = Math.max(200, Math.round(vv.height));
+                    var t = Math.round(vv.offsetTop || 0);
+                    trOvEl.style.height = h + 'px';
+                    trOvEl.style.top = t + 'px';
+                    trOvEl.style.bottom = 'auto';
+                    trOvEl.style.left = '0';
+                    trOvEl.style.right = '0';
+                    trOvEl.style.width = '100%';
+                    if (card) {
+                        card.style.height = h + 'px';
+                        card.style.maxHeight = h + 'px';
+                    }
+                } else {
+                    trOvEl.style.height = '';
+                    trOvEl.style.top = '';
+                    trOvEl.style.bottom = '';
+                    trOvEl.style.left = '';
+                    trOvEl.style.right = '';
+                    trOvEl.style.width = '';
+                    if (card) {
+                        card.style.height = '';
+                        card.style.maxHeight = '';
+                    }
+                }
+            }
+            if (trOvEl) {
+                var wasOpen = false;
+                new MutationObserver(function () {
+                    var isOpen = trOvEl.classList.contains('open');
+                    if (isOpen && !wasOpen) { trOpenedAt = Date.now(); trSetTab('order'); trLabelTabs(); }
+                    wasOpen = isOpen;
+                    trSyncViewport();
+                }).observe(trOvEl, { attributes: true, attributeFilter: ['class'] });
+            }
+            /* Unread badge is driven solely by notifyTradeChatOnOrderTab (appendMsg) —
+               no MutationObserver side-path to avoid double-counting history loads. */
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', trSyncViewport);
+                window.visualViewport.addEventListener('scroll', trSyncViewport);
+            }
+            window.addEventListener('orientationchange', function () { setTimeout(trSyncViewport, 250); });
             var input = document.getElementById('trInput');
             function fitTradeComposer() {
                 if (!input) return;
                 input.style.height = 'auto';
-                var maxH = window.matchMedia && window.matchMedia('(max-width: 520px)').matches ? 104 : 112;
+                var maxH = window.matchMedia && window.matchMedia('(max-width: 520px)').matches ? 84 : 112;
                 input.style.height = Math.min(input.scrollHeight, maxH) + 'px';
                 input.style.overflowY = input.scrollHeight > maxH ? 'auto' : 'hidden';
             }
@@ -13578,7 +13968,7 @@ function updateOrdersLocally() {
             if (input) {
                 input.addEventListener('focus', function () {
                     /* collapse details only on phones; on desktop nothing may jump while typing */
-                    if (window.matchMedia && window.matchMedia('(max-width: 520px), (pointer: coarse)').matches) setTradeKbOpen(true);
+                    if (window.matchMedia && window.matchMedia('(max-width: 520px)').matches) setTradeKbOpen(true);
                     setTimeout(function () {
                         var body = document.getElementById('trBody');
                         if (body) body.scrollTop = body.scrollHeight;
@@ -13601,11 +13991,14 @@ function updateOrdersLocally() {
                     var overlay = document.getElementById('tradeRoomOverlay');
                     if (!overlay || !overlay.classList.contains('open')) return;
                     var vv = window.visualViewport;
-                    /* keyboard likely open when visual height much smaller than layout */
-                    var kbLikely = vv && vv.height < window.innerHeight * 0.75;
+                    /* keyboard likely open when visual height much smaller than layout viewport */
+                    var kbLikely = vv && vv.height < window.innerHeight * 0.78;
                     var active = document.activeElement;
                     var typing = active && active.id === 'trInput';
-                    setTradeKbOpen(!!(kbLikely && typing));
+                    if (window.matchMedia && window.matchMedia('(max-width: 520px)').matches) {
+                        setTradeKbOpen(!!(kbLikely && typing));
+                    }
+                    trSyncViewport();
                 });
             }
         }
