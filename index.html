@@ -4568,15 +4568,12 @@
             color: #fff;
         }
 
-        /* ---- Scrollable middle: details / status / counterparty / chat ---- */
+        /* ---- Fixed middle layout: details / status / counterparty / chat ---- */
         .tr-scroll {
             flex: 1 1 auto; min-height: 0;
-            overflow-y: auto; overflow-x: hidden;
-            overscroll-behavior: contain;
-            -webkit-overflow-scrolling: touch;
+            display: flex; flex-direction: column;
+            overflow: hidden;
             padding: 14px 0 14px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(139, 92, 246, 0.35) transparent;
         }
 
         /* ---- Order details (invoice card) ---- */
@@ -4627,6 +4624,52 @@
             display: flex; flex-direction: column; gap: 0;
             width: 100%; min-width: 0;
             padding: 4px 0 2px;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            visibility: hidden;
+            transition: max-height 0.24s ease, opacity 0.18s ease, visibility 0s linear 0.24s;
+        }
+        .tr-invoice.details-open .tr-inv-details {
+            max-height: 520px;
+            opacity: 1;
+            visibility: visible;
+            transition: max-height 0.28s ease, opacity 0.18s ease, visibility 0s linear 0s;
+        }
+        .tr-details-toggle {
+            width: 100%;
+            margin-top: 4px;
+            min-height: 34px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px;
+            padding: 7px 2px 3px;
+            border: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: transparent;
+            color: #b9b2d0;
+            font: inherit;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tr-details-toggle:hover { color: #ddd6fe; }
+        .tr-details-toggle span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tr-details-chevron {
+            flex: 0 0 auto;
+            width: 22px; height: 22px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.04);
+            color: #a78bfa;
+            font-size: 14px;
+            line-height: 1;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .tr-invoice.details-open .tr-details-chevron {
+            transform: rotate(180deg);
+            background: rgba(139, 92, 246, 0.12);
         }
         .tr-inv-row {
             display: grid;
@@ -4799,7 +4842,8 @@
             margin: 8px 14px 0;
             display: flex;
             flex-direction: column;
-            min-height: 0;
+            flex: 1 1 auto;
+            min-height: 120px;
             border-radius: 16px;
             background: rgba(8, 5, 16, 0.50);
             border: 1px solid rgba(255, 255, 255, 0.06);
@@ -4808,10 +4852,13 @@
         }
         .tr-body {
             margin: 0;
-            min-height: 140px;
-            max-height: 300px;
-            overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+            min-height: 0;
+            max-height: none;
+            height: 100%;
+            overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain;
+            overscroll-behavior-x: none;
             -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
             padding: 14px 12px;
             border-radius: 0;
             background: transparent;
@@ -4974,23 +5021,15 @@
         .tr-card.tr-kb-open .tr-actions .tr-btns {
             display: none;
         }
-        .tr-card.tr-kb-open .tr-invoice {
-            display: none;
-        }
-        .tr-card.tr-kb-open .tr-status,
-        .tr-card.tr-kb-open .tr-peer {
-            display: none;
-        }
         .tr-card.tr-kb-open .tr-scroll {
-            padding-top: 4px;
+            padding-top: 6px;
             padding-bottom: 4px;
         }
         .tr-card.tr-kb-open .tr-chat-panel {
-            margin-top: 0;
+            margin-top: 6px;
         }
         .tr-card.tr-kb-open .tr-body {
-            max-height: none;
-            min-height: 80px;
+            min-height: 0;
         }
         .tr-in {
             flex: 1 1 auto; min-width: 0; width: 100%;
@@ -5049,19 +5088,23 @@
                 border-radius: 0; border-left: 0; border-right: 0;
             }
             .tr-head { padding: calc(14px + env(safe-area-inset-top, 0px)) 12px 12px 14px; }
-            .tr-scroll { padding: 10px 0 8px; }
+            .tr-scroll {
+                padding: 10px 0 8px;
+                overflow: hidden;
+            }
             .tr-invoice, .tr-status, .tr-peer, .tr-chat-panel { margin-left: 12px; margin-right: 12px; }
             .tr-invoice { padding: 12px 12px 4px; }
-            /* messages fill remaining scroll; form is outside scroll at bottom */
+            /* only the message list scrolls; details/status/order context stay in place */
             .tr-chat-panel {
                 display: flex; flex-direction: column;
-                min-height: 140px;
+                min-height: 120px;
                 flex: 1 1 auto;
             }
             .tr-body {
                 flex: 1 1 auto;
-                min-height: 100px;
+                min-height: 0;
                 max-height: none;
+                touch-action: pan-y;
             }
             .tr-actions {
                 padding: 8px 12px 8px;
@@ -12673,6 +12716,7 @@ function updateOrdersLocally() {
         var pollTimer = null;
         var seen = {};
         var readOnly = false;
+        var detailsOpen = false;
 
         function t() {
             var lang = document.getElementById('langSelect') ? document.getElementById('langSelect').value : 'ru';
@@ -12744,6 +12788,7 @@ function updateOrdersLocally() {
                 text = text.replace(/Приветствую\s+уважаемый\s+пользователь\s*\.?/gi, 'Приветствую, уважаемый пользователь!');
             }
             var side = from === 'client' ? 'c' : (from === 'system' ? 'sys' : 's');
+            var wasNearBottom = (body.scrollHeight - body.scrollTop - body.clientHeight) < 48;
             var m = el('div', 'tr-m ' + side);
             var trL = t();
             var who = from === 'client' ? (trL.tradeYouLabel || 'You') : (from === 'system' ? (trL.tradeSystemLabel || 'SYSTEM') : (trL.tradePeerDefault || 'Swift Bridge Hub'));
@@ -12754,7 +12799,7 @@ function updateOrdersLocally() {
                 if (tstr) m.appendChild(el('div', 'tr-ts', tstr));
             } catch (e) {}
             body.appendChild(m);
-            body.scrollTop = body.scrollHeight;
+            if (wasNearBottom || from === 'client') body.scrollTop = body.scrollHeight;
         }
 
         function renderServerMsg(msg) {
@@ -12921,6 +12966,7 @@ function updateOrdersLocally() {
             var netLabel = (String(o.network || '').toUpperCase() === 'BSC') ? 'BEP20' : (o.network || '\u2014');
 
             if (meta) {
+                meta.classList.toggle('details-open', !!detailsOpen);
                 meta.innerHTML =
                     '<div class="tr-inv-hero">' +
                       '<div class="tr-inv-hero-label">' + escapeHtml(primaryLabel) + '</div>' +
@@ -12929,6 +12975,7 @@ function updateOrdersLocally() {
                       secondaryHtml +
                       (rateStr !== '\u2014' ? ('<div class="tr-inv-hero-sub"><b>' + escapeHtml(tr.histLockedRate || 'Rate') + '</b> &nbsp;1&nbsp;' + escapeHtml(asset) + ' \u2248 ' + escapeHtml(rateStr) + (fiat ? ('&nbsp;' + escapeHtml(fiat)) : '') + '</div>') : '') +
                     '</div>' +
+                    '<button type="button" class="tr-details-toggle" id="trDetailsToggle" aria-expanded="' + (detailsOpen ? 'true' : 'false') + '"><span>' + escapeHtml(tr.tradeOrderDetails || tr.histDetails || 'Order details') + '</span><span class="tr-details-chevron" aria-hidden="true">⌄</span></button>' +
                     '<div class="tr-inv-details">' +
                       '<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.tradeDirection || 'Direction') + '</div><div class="tr-inv-v">' + escapeHtml(o.direction || '\u2014') + '</div></div>' +
                       '<div class="tr-inv-row"><div class="tr-inv-k">' + escapeHtml(tr.histCounterparty || tr.tradeCounterparty || 'Counterparty') + '</div><div class="tr-inv-v">' + escapeHtml(peerName) + '</div></div>' +
@@ -13150,6 +13197,7 @@ function updateOrdersLocally() {
             if (orderRef.status === 'CANCELLED' || orderRef.status === 'COMPLETED') {
                 setReadOnly(true);
             }
+            detailsOpen = false;
             fillHeader(orderRef);
             rebuildActionButtons(orderRef);
             if (typeof renderActiveOrders === 'function') renderActiveOrders();
@@ -13498,6 +13546,21 @@ function updateOrdersLocally() {
                 e.preventDefault();
                 window.closeTradeRoom();
             });
+            var meta = document.getElementById('trMeta');
+            if (meta && !meta._trDetailsBound) {
+                meta._trDetailsBound = true;
+                meta.addEventListener('click', function (e) {
+                    var btn = e.target && e.target.closest ? e.target.closest('#trDetailsToggle') : null;
+                    if (!btn) return;
+                    e.preventDefault();
+                    detailsOpen = !detailsOpen;
+                    var invoice = document.getElementById('trMeta');
+                    if (invoice) {
+                        invoice.classList.toggle('details-open', detailsOpen);
+                        btn.setAttribute('aria-expanded', detailsOpen ? 'true' : 'false');
+                    }
+                });
+            }
             var input = document.getElementById('trInput');
             function fitTradeComposer() {
                 if (!input) return;
@@ -13526,10 +13589,7 @@ function updateOrdersLocally() {
             if (input) {
                 input.addEventListener('focus', function () {
                     setTradeKbOpen(true);
-                    setTimeout(function () {
-                        var body = document.getElementById('trBody');
-                        if (body) body.scrollTop = body.scrollHeight;
-                    }, 300);
+                    fitTradeComposer();
                 });
                 input.addEventListener('blur', function () {
                     setTimeout(function () { setTradeKbOpen(false); }, 150);
